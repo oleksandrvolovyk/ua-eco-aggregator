@@ -5,3 +5,4 @@ rootProject.name = "UaEcoAggregator"
 include("ScraperAPI")
 include("MeteoGovUaScraper")
 include("SensorCommunityScraper")
+include("EcoCityScraper")
