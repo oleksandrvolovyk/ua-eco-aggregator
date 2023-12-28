@@ -2,7 +2,7 @@ package model
 
 data class Measurement(
     val name: String,
-    val value: Double,
+    val value: String,
     val time: String,
 ) : ApiResponseRecord
 

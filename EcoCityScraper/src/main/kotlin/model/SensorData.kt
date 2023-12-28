@@ -5,5 +5,5 @@ data class SensorData(
     val long: Double,
     val time: String,
     val name: String,
-    val value: Double
+    val value: String
 )

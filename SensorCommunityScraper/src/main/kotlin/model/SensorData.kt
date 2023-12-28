@@ -10,7 +10,7 @@ data class SensorData(
 ) {
     data class Value(
         @SerializedName(value = "value_type") val valueType: String,
-        val value: Double
+        val value: String
     )
 
     data class Location(

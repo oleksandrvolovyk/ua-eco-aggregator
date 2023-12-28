@@ -29,7 +29,7 @@ class ApiResponseDeserializer : JsonDeserializer<ApiResponse> {
                     result.add(
                         Measurement(
                             jsonMeasurementObject.get("name").asString,
-                            jsonMeasurementObject.get("value").asDouble,
+                            jsonMeasurementObject.get("value").asString,
                             jsonMeasurementObject.get("time").asString
                         )
                     )
@@ -51,7 +51,7 @@ class ApiResponseDeserializer : JsonDeserializer<ApiResponse> {
                     result.add(
                         Measurement(
                             jsonMeasurementObject.get("name").asString,
-                            jsonMeasurementObject.get("value").asDouble,
+                            jsonMeasurementObject.get("value").asString,
                             jsonMeasurementObject.get("time").asString
                         )
                     )
