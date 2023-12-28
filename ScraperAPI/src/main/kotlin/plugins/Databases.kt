@@ -2,12 +2,15 @@ package plugins
 
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.*
+import io.ktor.server.plugins.doublereceive.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
 fun Application.configureDatabases() {
+    install(DoubleReceive)
 
     val scraperService by inject<ScraperService>()
     val airQualityService by inject<AirQualityService>()
@@ -67,9 +70,19 @@ fun Application.configureDatabases() {
 
             // Post new radiation record
             post {
-                val radiationRecordDTO = call.receive<RadiationRecordDTO>()
-                val id = radiationService.create(radiationRecordDTO)
-                call.respond(HttpStatusCode.Created, id)
+                try {
+                    val radiationRecordDTO = call.receive<RadiationRecordDTO>()
+                    val id = radiationService.create(radiationRecordDTO)
+                    call.respond(HttpStatusCode.Created, id)
+                } catch (_: BadRequestException) {
+                }
+
+                try {
+                    val radiationRecordDTOs = call.receive<List<RadiationRecordDTO>>()
+                    radiationService.create(radiationRecordDTOs)
+                    call.respond(HttpStatusCode.Created)
+                } catch (_: BadRequestException) {
+                }
             }
 
             // Delete radiation record

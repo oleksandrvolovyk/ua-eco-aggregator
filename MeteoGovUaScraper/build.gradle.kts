@@ -13,6 +13,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":ScraperAPI"))
     testImplementation(kotlin("test"))
 
     // Ktor

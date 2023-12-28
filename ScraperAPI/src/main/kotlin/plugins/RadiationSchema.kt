@@ -73,6 +73,12 @@ class RadiationService(database: Database) {
         }[RadiationRecords.id]
     }
 
+    suspend fun create(radiationRecordDTOs: List<RadiationRecordDTO>) = dbQuery {
+        radiationRecordDTOs.forEach { radiationRecordDTO ->
+            create(radiationRecordDTO)
+        }
+    }
+
     suspend fun readAll(): List<ExposedRadiationRecord> = dbQuery {
         RadiationRecords.selectAll().map { it.toRadiationRecord() }
     }

@@ -1,71 +1,77 @@
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
 import com.google.gson.reflect.TypeToken
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.serialization.gson.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import model.FullMeteoData
 import model.MeteoData
 import model.toFullMeteoData
-import java.lang.reflect.Type
+import plugins.RadiationRecordDTO
 import java.text.SimpleDateFormat
+
+val SCRAPING_API_URL = System.getenv("SCRAPING_API_URL")
+val SCRAPING_API_KEY = System.getenv("SCRAPING_API_KEY")
+
+val POLLING_DELAY_IN_SECONDS = System.getenv("POLLING_DELAY_IN_SECONDS").toLong()
 
 fun main(): Unit = runBlocking {
 
-    val client = HttpClient(CIO)
+    val client = HttpClient(CIO) {
+        install(ContentNegotiation) {
+            gson()
+        }
+    }
+
     val gson = GsonBuilder()
         .registerTypeAdapter(MeteoData::class.java, MeteoDataDeserializer())
         .create()
 
-    val responseString = client.get("https://www.meteo.gov.ua/_/m/radioday.js").bodyAsText()
-
-    client.close()
-
     val typeToken = object : TypeToken<Map<Int, MeteoData?>>() {}
-
-    val meteoDatas = gson.fromJson(responseString, typeToken)
-
-    val fullMeteodatas = mutableListOf<FullMeteoData>()
-
-    meteoDatas.forEach { entry ->
-        entry.value?.let { fullMeteodatas.add(it.toFullMeteoData(entry.key)) }
-    }
 
     val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
 
-    println(
-        buildString {
-            fullMeteodatas.forEach {
-                val date = dateFormat.parse("${it.date} ${it.time}")
-                val unixTimestamp = date.time / 1000 // Convert milliseconds to seconds
-                append("TIMESTAMP: ${unixTimestamp}, LAT: ${it.location.first}, LONG: ${it.location.second}, dose - ${it.doseInNanoSievert} nanoSievert/hour")
-                append("\n")
-            }
-        }
-    )
-}
+    while (true) {
+        val responseString = client.get("https://www.meteo.gov.ua/_/m/radioday.js").bodyAsText()
 
-class MeteoDataDeserializer : JsonDeserializer<MeteoData> {
-    override fun deserialize(
-        json: JsonElement?,
-        typeOfT: Type?,
-        context: JsonDeserializationContext?
-    ): MeteoData? {
-        if (json == null || !json.isJsonObject) {
-            return null
+        val meteoDatas = gson.fromJson(responseString, typeToken)
+
+        val fullMeteodatas = mutableListOf<FullMeteoData>()
+
+        meteoDatas.forEach { entry ->
+            entry.value?.let { fullMeteodatas.add(it.toFullMeteoData(entry.key)) }
         }
 
-        val jsonObject = json.asJsonObject
+        val radiationRecordDTOs = List(fullMeteodatas.size) { index ->
+            val fullMeteodata = fullMeteodatas[index]
 
-        val date = jsonObject.get("CD")?.asString ?: ""
-        val time = jsonObject.get("CH")?.asString ?: ""
-        val doseInMicroRoentgen = jsonObject.get("VR")?.asInt ?: 0
-        val doseInNanoSievert = jsonObject.get("VZ")?.asInt ?: 0
+            val date = dateFormat.parse("${fullMeteodata.date} ${fullMeteodata.time}")
+            val unixTimestamp = date.time / 1000 // Convert milliseconds to seconds
 
-        return MeteoData(date, time, doseInMicroRoentgen, doseInNanoSievert)
+            RadiationRecordDTO(
+                latitude = fullMeteodata.location.first,
+                longitude = fullMeteodata.location.second,
+                timestamp = unixTimestamp,
+                doseInNanoSievert = fullMeteodata.doseInNanoSievert,
+                apiKey = SCRAPING_API_KEY,
+                metadata = "MeteoGovUaScraper $index"
+            )
+        }
+
+        println("Received ${radiationRecordDTOs.size} records.")
+
+        client.post(SCRAPING_API_URL) {
+            contentType(ContentType.Application.Json)
+            setBody(radiationRecordDTOs)
+        }
+
+        println("Sent ${radiationRecordDTOs.size} records.")
+
+        delay(POLLING_DELAY_IN_SECONDS * 1000)
     }
 }
