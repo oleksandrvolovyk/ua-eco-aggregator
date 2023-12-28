@@ -8,6 +8,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/EcoCityScraper" />
             <option value="$PROJECT_DIR$/MeteoGovUaScraper" />
             <option value="$PROJECT_DIR$/ScraperAPI" />
             <option value="$PROJECT_DIR$/SensorCommunityScraper" />
