@@ -65,12 +65,15 @@ fun main(): Unit = runBlocking {
 
         println("Received ${radiationRecordDTOs.size} records.")
 
-        client.post(SCRAPING_API_URL) {
+        val response = client.post(SCRAPING_API_URL) {
             contentType(ContentType.Application.Json)
             setBody(radiationRecordDTOs)
         }
 
-        println("Sent ${radiationRecordDTOs.size} records.")
+        println("Sent ${radiationRecordDTOs.size} records. API response status code: ${response.status}")
+        if (!response.status.isSuccess()) {
+            println(response.bodyAsText())
+        }
 
         delay(POLLING_DELAY_IN_SECONDS * 1000)
     }

@@ -48,6 +48,10 @@ class RadiationService(database: Database) {
         val createdAt = long("createdAt")
 
         override val primaryKey = PrimaryKey(id)
+
+        init {
+            uniqueIndex(latitude, longitude, timestamp, provider)
+        }
     }
 
     init {
