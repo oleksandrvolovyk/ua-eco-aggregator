@@ -7,6 +7,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.java.KoinJavaComponent.inject
+import java.time.Instant
 
 @Serializable
 data class ExposedAirQualityRecord(
@@ -18,7 +19,8 @@ data class ExposedAirQualityRecord(
     val pm25: Float,
     val pm100: Float,
     val providerId: Int,
-    val metadata: String
+    val metadata: String,
+    val createdAt: Long
 )
 
 @Serializable
@@ -49,8 +51,13 @@ class AirQualityService(database: Database) {
 
         val provider = reference("provider", ScraperService.Scrapers.id)
         val metadata = varchar("metadata", length = 500)
+        val createdAt = long("createdAt")
 
         override val primaryKey = PrimaryKey(id)
+
+        init {
+            uniqueIndex(latitude, longitude, timestamp, provider)
+        }
     }
 
     init {
@@ -74,7 +81,14 @@ class AirQualityService(database: Database) {
             it[pm100] = airQualityRecordDTO.pm100
             it[provider] = scraper.id
             it[metadata] = airQualityRecordDTO.metadata
+            it[createdAt] = Instant.now().epochSecond
         }[AirQualityRecords.id]
+    }
+
+    suspend fun create(airQualityRecordDTOs: List<AirQualityRecordDTO>) = dbQuery {
+        airQualityRecordDTOs.forEach { airQualityRecordDTO ->
+            create(airQualityRecordDTO)
+        }
     }
 
     suspend fun readAll(): List<ExposedAirQualityRecord> = dbQuery {
@@ -98,6 +112,7 @@ class AirQualityService(database: Database) {
         this[AirQualityRecords.pm25],
         this[AirQualityRecords.pm100],
         this[AirQualityRecords.provider],
-        this[AirQualityRecords.metadata]
+        this[AirQualityRecords.metadata],
+        this[AirQualityRecords.createdAt]
     )
 }

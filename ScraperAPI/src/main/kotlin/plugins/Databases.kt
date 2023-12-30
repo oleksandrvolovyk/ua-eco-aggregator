@@ -37,8 +37,8 @@ fun Application.configureDatabases() {
 
             // Post new air quality record
             post {
-                val airQualityRecordDTO = call.receive<AirQualityRecordDTO>()
-                val id = airQualityService.create(airQualityRecordDTO)
+                val airQualityRecordDTOs = call.receive<List<AirQualityRecordDTO>>()
+                val id = airQualityService.create(airQualityRecordDTOs)
                 call.respond(HttpStatusCode.Created, id)
             }
 
