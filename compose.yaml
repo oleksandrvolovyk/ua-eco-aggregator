@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_pass
+      POSTGRES_DB: environment
+
+  scraper-api:
+    build: ./ScraperAPI/.
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASS: postgres_pass
+      POSTGRES_DB_NAME: environment
+
+  lun-misto-scraper:
+    build: ./LunMistoScraper/.
+    depends_on:
+      - scraper-api
+    environment:
+      SCRAPING_API_URL: "http://scraper-api:8080/air-quality-records"
+      SCRAPING_API_KEY: "lun-misto-scraper"
+      POLLING_DELAY_IN_SECONDS: 1000
+
+  sensor-community-scraper:
+    build: ./SensorCommunityScraper/.
+    depends_on:
+      - scraper-api
+    environment:
+      SCRAPING_API_URL: "http://scraper-api:8080/air-quality-records"
+      SCRAPING_API_KEY: "sensor-community-scraper"
+      POLLING_DELAY_IN_SECONDS: 1000
+
+  meteo-gov-ua-scraper:
+    build: ./MeteoGovUaScraper/.
+    depends_on:
+      - scraper-api
+    environment:
+      SCRAPING_API_URL: "http://scraper-api:8080/radiation-records"
+      SCRAPING_API_KEY: "meteo-gov-ua-scraper"
+      POLLING_DELAY_IN_SECONDS: 1000
