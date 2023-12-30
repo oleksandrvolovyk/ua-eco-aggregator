@@ -69,10 +69,10 @@ class AirQualityService(database: Database) {
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
 
-    suspend fun create(airQualityRecordDTO: AirQualityRecordDTO): Int = dbQuery {
+    private suspend fun create(airQualityRecordDTO: AirQualityRecordDTO): Boolean {
         val scraper = scraperService.getByApiKey(airQualityRecordDTO.apiKey)!!
 
-        AirQualityRecords.insert {
+        return AirQualityRecords.insertIgnore {
             it[latitude] = airQualityRecordDTO.latitude
             it[longitude] = airQualityRecordDTO.longitude
             it[timestamp] = airQualityRecordDTO.timestamp
@@ -82,13 +82,19 @@ class AirQualityService(database: Database) {
             it[provider] = scraper.id
             it[metadata] = airQualityRecordDTO.metadata
             it[createdAt] = Instant.now().epochSecond
-        }[AirQualityRecords.id]
+        }.insertedCount != 0
     }
 
-    suspend fun create(airQualityRecordDTOs: List<AirQualityRecordDTO>) = dbQuery {
+    suspend fun create(airQualityRecordDTOs: List<AirQualityRecordDTO>): Int = dbQuery {
+        var addedCounter = 0
+
         airQualityRecordDTOs.forEach { airQualityRecordDTO ->
-            create(airQualityRecordDTO)
+            if (create(airQualityRecordDTO)) {
+                addedCounter++
+            }
         }
+
+        return@dbQuery addedCounter
     }
 
     suspend fun readAll(): List<ExposedAirQualityRecord> = dbQuery {

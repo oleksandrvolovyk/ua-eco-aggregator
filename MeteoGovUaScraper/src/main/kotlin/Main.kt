@@ -71,9 +71,7 @@ fun main(): Unit = runBlocking {
         }
 
         println("Sent ${radiationRecordDTOs.size} records. API response status code: ${response.status}")
-        if (!response.status.isSuccess()) {
-            println(response.bodyAsText())
-        }
+        println("Response: ${response.bodyAsText()}")
 
         delay(POLLING_DELAY_IN_SECONDS * 1000)
     }

@@ -63,10 +63,10 @@ class RadiationService(database: Database) {
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
 
-    suspend fun create(radiationRecordDTO: RadiationRecordDTO): Int = dbQuery {
+    private suspend fun create(radiationRecordDTO: RadiationRecordDTO): Boolean {
         val scraper = scraperService.getByApiKey(radiationRecordDTO.apiKey)!!
 
-        RadiationRecords.insert {
+        return RadiationRecords.insertIgnore {
             it[latitude] = radiationRecordDTO.latitude
             it[longitude] = radiationRecordDTO.longitude
             it[timestamp] = radiationRecordDTO.timestamp
@@ -74,13 +74,19 @@ class RadiationService(database: Database) {
             it[provider] = scraper.id
             it[metadata] = radiationRecordDTO.metadata
             it[createdAt] = Instant.now().epochSecond
-        }[RadiationRecords.id]
+        }.insertedCount != 0
     }
 
-    suspend fun create(radiationRecordDTOs: List<RadiationRecordDTO>) = dbQuery {
+    suspend fun create(radiationRecordDTOs: List<RadiationRecordDTO>): Int = dbQuery {
+        var addedCounter = 0
+
         radiationRecordDTOs.forEach { radiationRecordDTO ->
-            create(radiationRecordDTO)
+            if (create(radiationRecordDTO)) {
+                addedCounter++
+            }
         }
+
+        return@dbQuery addedCounter
     }
 
     suspend fun readAll(): List<ExposedRadiationRecord> = dbQuery {

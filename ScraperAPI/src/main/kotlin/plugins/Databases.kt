@@ -2,7 +2,6 @@ package plugins
 
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.plugins.*
 import io.ktor.server.plugins.doublereceive.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -35,11 +34,11 @@ fun Application.configureDatabases() {
                 }
             }
 
-            // Post new air quality record
+            // Post new air quality records
             post {
                 val airQualityRecordDTOs = call.receive<List<AirQualityRecordDTO>>()
-                val id = airQualityService.create(airQualityRecordDTOs)
-                call.respond(HttpStatusCode.Created, id)
+                val createdCount = airQualityService.create(airQualityRecordDTOs)
+                call.respond(HttpStatusCode.Created, "Saved $createdCount records")
             }
 
             // Delete air quality record by id
@@ -68,21 +67,11 @@ fun Application.configureDatabases() {
                 }
             }
 
-            // Post new radiation record
+            // Post new radiation records
             post {
-                try {
-                    val radiationRecordDTO = call.receive<RadiationRecordDTO>()
-                    val id = radiationService.create(radiationRecordDTO)
-                    call.respond(HttpStatusCode.Created, id)
-                } catch (_: BadRequestException) {
-                }
-
-                try {
-                    val radiationRecordDTOs = call.receive<List<RadiationRecordDTO>>()
-                    radiationService.create(radiationRecordDTOs)
-                    call.respond(HttpStatusCode.Created)
-                } catch (_: BadRequestException) {
-                }
+                val radiationRecordDTOs = call.receive<List<RadiationRecordDTO>>()
+                val createdCount = radiationService.create(radiationRecordDTOs)
+                call.respond(HttpStatusCode.Created, "Saved $createdCount records")
             }
 
             // Delete radiation record
