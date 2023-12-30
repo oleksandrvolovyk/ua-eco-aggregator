@@ -9,7 +9,6 @@ import io.ktor.serialization.gson.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import model.*
-import plugins.AirQualityRecordDTO
 import java.text.SimpleDateFormat
 
 val BLOCK_LIST = listOf("ЛУН Місто Air")

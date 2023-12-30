@@ -1,17 +1,9 @@
-package plugins
-
 import kotlinx.coroutines.Dispatchers
-import kotlinx.serialization.Serializable
+import model.Scraper
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
-
-@Serializable
-data class ExposedScraper(val id: Int, val name: String, val apiKey: String)
-
-@Serializable
-data class ScraperDTO(val name: String, val apiKey: String)
 
 class ScraperService(database: Database) {
     object Scrapers : Table() {
@@ -38,20 +30,20 @@ class ScraperService(database: Database) {
         }[Scrapers.id]
     }
 
-    suspend fun readAll(): List<ExposedScraper> = dbQuery {
+    suspend fun readAll(): List<Scraper> = dbQuery {
         Scrapers.selectAll()
-            .map { ExposedScraper(it[Scrapers.id], it[Scrapers.name], it[Scrapers.apiKey]) }
+            .map { Scraper(it[Scrapers.id], it[Scrapers.name], it[Scrapers.apiKey]) }
     }
 
-    suspend fun read(id: Int): ExposedScraper? = dbQuery {
+    suspend fun read(id: Int): Scraper? = dbQuery {
         Scrapers.select { Scrapers.id eq id }
-            .map { ExposedScraper(it[Scrapers.id], it[Scrapers.name], it[Scrapers.apiKey]) }
+            .map { Scraper(it[Scrapers.id], it[Scrapers.name], it[Scrapers.apiKey]) }
             .singleOrNull()
     }
 
-    suspend fun getByApiKey(apiKey: String): ExposedScraper? = dbQuery {
+    suspend fun getByApiKey(apiKey: String): Scraper? = dbQuery {
         Scrapers.select { Scrapers.apiKey eq apiKey }
-            .map { ExposedScraper(it[Scrapers.id], it[Scrapers.name], it[Scrapers.apiKey]) }
+            .map { Scraper(it[Scrapers.id], it[Scrapers.name], it[Scrapers.apiKey]) }
             .singleOrNull()
     }
 

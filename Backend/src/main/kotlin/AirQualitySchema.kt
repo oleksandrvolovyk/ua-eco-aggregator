@@ -1,39 +1,12 @@
-package plugins
-
 import kotlinx.coroutines.Dispatchers
-import kotlinx.serialization.Serializable
+import model.AirQualityRecord
+import model.AirQualityRecordDTO
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.java.KoinJavaComponent.inject
 import java.time.Instant
-
-@Serializable
-data class ExposedAirQualityRecord(
-    val id: Int,
-    val latitude: Double,
-    val longitude: Double,
-    val timestamp: Long,
-    val pm10: Float? = null,
-    val pm25: Float,
-    val pm100: Float,
-    val providerId: Int,
-    val metadata: String,
-    val createdAt: Long
-)
-
-@Serializable
-data class AirQualityRecordDTO(
-    val latitude: Double,
-    val longitude: Double,
-    val timestamp: Long,
-    val pm10: Float? = null,
-    val pm25: Float,
-    val pm100: Float,
-    val apiKey: String,
-    val metadata: String
-)
 
 class AirQualityService(database: Database) {
 
@@ -97,11 +70,11 @@ class AirQualityService(database: Database) {
         return@dbQuery addedCounter
     }
 
-    suspend fun readAll(): List<ExposedAirQualityRecord> = dbQuery {
+    suspend fun readAll(): List<AirQualityRecord> = dbQuery {
         AirQualityRecords.selectAll().map { it.toAirQualityRecord() }
     }
 
-    suspend fun read(id: Int): ExposedAirQualityRecord? = dbQuery {
+    suspend fun read(id: Int): AirQualityRecord? = dbQuery {
         AirQualityRecords.select { AirQualityRecords.id eq id }.map { it.toAirQualityRecord() }
     }.singleOrNull()
 
@@ -109,7 +82,7 @@ class AirQualityService(database: Database) {
         AirQualityRecords.deleteWhere { AirQualityRecords.id eq id }
     }
 
-    private fun ResultRow.toAirQualityRecord() = ExposedAirQualityRecord(
+    private fun ResultRow.toAirQualityRecord() = AirQualityRecord(
         this[AirQualityRecords.id],
         this[AirQualityRecords.latitude],
         this[AirQualityRecords.longitude],

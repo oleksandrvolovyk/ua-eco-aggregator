@@ -1,11 +1,17 @@
 package plugins
 
+import AirQualityService
+import RadiationService
+import ScraperService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.doublereceive.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import model.AirQualityRecordDTO
+import model.RadiationRecordDTO
+import model.ScraperDTO
 import org.koin.ktor.ext.inject
 
 fun Application.configureDatabases() {

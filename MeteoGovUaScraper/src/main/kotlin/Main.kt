@@ -11,8 +11,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import model.FullMeteoData
 import model.MeteoData
+import model.RadiationRecordDTO
 import model.toFullMeteoData
-import plugins.RadiationRecordDTO
 import java.text.SimpleDateFormat
 
 val SCRAPING_API_URL = System.getenv("SCRAPING_API_URL")

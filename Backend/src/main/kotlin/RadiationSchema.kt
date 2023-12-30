@@ -1,35 +1,12 @@
-package plugins
-
 import kotlinx.coroutines.Dispatchers
-import kotlinx.serialization.Serializable
+import model.RadiationRecord
+import model.RadiationRecordDTO
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.java.KoinJavaComponent.inject
 import java.time.Instant
-
-@Serializable
-data class ExposedRadiationRecord(
-    val id: Int,
-    val latitude: Double,
-    val longitude: Double,
-    val timestamp: Long,
-    val doseInNanoSievert: Int,
-    val providerId: Int,
-    val metadata: String,
-    val createdAt: Long
-)
-
-@Serializable
-data class RadiationRecordDTO(
-    val latitude: Double,
-    val longitude: Double,
-    val timestamp: Long,
-    val doseInNanoSievert: Int,
-    val apiKey: String,
-    val metadata: String
-)
 
 class RadiationService(database: Database) {
 
@@ -89,11 +66,11 @@ class RadiationService(database: Database) {
         return@dbQuery addedCounter
     }
 
-    suspend fun readAll(): List<ExposedRadiationRecord> = dbQuery {
+    suspend fun readAll(): List<RadiationRecord> = dbQuery {
         RadiationRecords.selectAll().map { it.toRadiationRecord() }
     }
 
-    suspend fun read(id: Int): ExposedRadiationRecord? = dbQuery {
+    suspend fun read(id: Int): RadiationRecord? = dbQuery {
         RadiationRecords.select { RadiationRecords.id eq id }.map { it.toRadiationRecord() }
     }.singleOrNull()
 
@@ -101,7 +78,7 @@ class RadiationService(database: Database) {
         RadiationRecords.deleteWhere { RadiationRecords.id eq id }
     }
 
-    private fun ResultRow.toRadiationRecord() = ExposedRadiationRecord(
+    private fun ResultRow.toRadiationRecord() = RadiationRecord(
         this[RadiationRecords.id],
         this[RadiationRecords.latitude],
         this[RadiationRecords.longitude],

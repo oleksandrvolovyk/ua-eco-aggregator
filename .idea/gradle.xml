@@ -9,6 +9,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/Backend" />
+            <option value="$PROJECT_DIR$/Base" />
             <option value="$PROJECT_DIR$/EcoCityScraper" />
             <option value="$PROJECT_DIR$/LunMistoScraper" />
             <option value="$PROJECT_DIR$/MeteoGovUaScraper" />

@@ -8,8 +8,8 @@ import io.ktor.http.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import model.AirQualityRecordDTO
 import model.SensorData
-import plugins.AirQualityRecordDTO
 import java.text.SimpleDateFormat
 
 val SCRAPING_API_URL = System.getenv("SCRAPING_API_URL")
