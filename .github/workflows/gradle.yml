@@ -44,6 +44,7 @@ jobs:
         repo: ua-eco-aggregator-public
         release_name: Release ${{ github.ref_name }}
         tag_name: ${{ github.ref_name }}
+        commitish: main
         body: Release ${{ github.ref_name }} body
         draft: false
         prerelease: false
