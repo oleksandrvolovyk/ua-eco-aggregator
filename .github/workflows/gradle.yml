@@ -1,0 +1,91 @@
+name: CI with Gradle
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 19
+      uses: actions/setup-java@v3
+      with:
+        java-version: '19'
+        distribution: 'temurin'
+        
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build LunMistoScraper app JAR
+      run: ./gradlew :LunMistoScraper:buildFatJar
+
+    - name: Build SensorCommunityScraper app JAR
+      run: ./gradlew :SensorCommunityScraper:buildFatJar
+
+    - name: Build MeteoGovUaScraper app JAR
+      run: ./gradlew :MeteoGovUaScraper:buildFatJar
+
+    - name: Build Scraper API JAR
+      run: ./gradlew :ScraperAPI:buildFatJar
+
+    - name: Create a remote release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        owner: oleksandrvolovyk
+        repo: ua-eco-aggregator-public
+        release_name: Release ${{ github.ref_name }}
+        tag_name: ${{ github.ref_name }}
+        body: Release ${{ github.ref_name }} body
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    - name: Upload LunMistoScraper JAR
+      uses: actions/upload-release-asset@v1.0.1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: LunMistoScraper/build/libs/LunMistoScraper-all.jar
+        asset_name: LunMistoScraper.jar
+        asset_content_type: application/zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    - name: Upload SensorCommunityScraper JAR
+      uses: actions/upload-release-asset@v1.0.1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: SensorCommunityScraper/build/libs/SensorCommunityScraper-all.jar
+        asset_name: SensorCommunityScraper.jar
+        asset_content_type: application/zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    - name: Upload MeteoGovUaScraper JAR
+      uses: actions/upload-release-asset@v1.0.1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: MeteoGovUaScraper/build/libs/MeteoGovUaScraper-all.jar
+        asset_name: MeteoGovUaScraper.jar
+        asset_content_type: application/zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    - name: Upload ScraperAPI JAR
+      uses: actions/upload-release-asset@v1.0.1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ScraperAPI/build/libs/ScraperAPI-all.jar
+        asset_name: ScraperAPI.jar
+        asset_content_type: application/zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
