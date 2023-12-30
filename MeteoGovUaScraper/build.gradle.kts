@@ -3,6 +3,7 @@ val ktor_version: String by project
 plugins {
     kotlin("jvm")
     application
+    id("io.ktor.plugin") version "2.3.7"
 }
 
 group = "volovyk.eco_aggregator"

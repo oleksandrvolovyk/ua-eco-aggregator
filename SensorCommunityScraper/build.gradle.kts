@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm")
     application
+    id("io.ktor.plugin") version "2.3.7"
 }
 
 val ktor_version: String by project
