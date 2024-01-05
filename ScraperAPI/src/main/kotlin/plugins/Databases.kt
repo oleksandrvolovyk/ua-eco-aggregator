@@ -17,7 +17,6 @@ import org.koin.ktor.ext.inject
 fun Application.configureDatabases() {
     install(DoubleReceive)
 
-    val scraperService by inject<ScraperService>()
     val airQualityService by inject<AirQualityService>()
     val radiationService by inject<RadiationService>()
 
@@ -87,47 +86,6 @@ fun Application.configureDatabases() {
                     0 -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(HttpStatusCode.OK)
                 }
-            }
-        }
-
-        route("/scrapers") {
-            // Get all scrapers
-            get {
-                val scrapers = scraperService.readAll()
-                call.respond(HttpStatusCode.OK, scrapers)
-            }
-
-            // Read scraper by ID
-            get("/{id}") {
-                val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-                val scraper = scraperService.read(id)
-                if (scraper != null) {
-                    call.respond(HttpStatusCode.OK, scraper)
-                } else {
-                    call.respond(HttpStatusCode.NotFound)
-                }
-            }
-
-            // Create scraper
-            post {
-                val scraper = call.receive<ScraperDTO>()
-                val id = scraperService.create(scraper.name, scraper.apiKey)
-                call.respond(HttpStatusCode.Created, id)
-            }
-
-            // Update scraper
-            put("/{id}") {
-                val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-                val scraper = call.receive<ScraperDTO>()
-                scraperService.update(id, scraper.name, scraper.apiKey)
-                call.respond(HttpStatusCode.OK)
-            }
-
-            // Delete scraper
-            delete("/{id}") {
-                val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-                scraperService.delete(id)
-                call.respond(HttpStatusCode.OK)
             }
         }
     }
