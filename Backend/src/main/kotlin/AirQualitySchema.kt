@@ -78,6 +78,17 @@ class AirQualityService(database: Database) {
         AirQualityRecords.select { AirQualityRecords.id eq id }.map { it.toAirQualityRecord() }
     }.singleOrNull()
 
+    suspend fun readLatestSubmittedRecordByProvider(providerId: Int): AirQualityRecord? = dbQuery {
+        AirQualityRecords.select { AirQualityRecords.provider eq providerId }
+            .sortedByDescending { AirQualityRecords.createdAt }
+            .map { it.toAirQualityRecord() }
+    }.singleOrNull()
+
+    suspend fun getTotalSubmittedRecordsByProvider(providerId: Int): Long = dbQuery {
+        AirQualityRecords.select { AirQualityRecords.provider eq providerId }
+            .count()
+    }
+
     suspend fun delete(id: Int) = dbQuery {
         AirQualityRecords.deleteWhere { AirQualityRecords.id eq id }
     }

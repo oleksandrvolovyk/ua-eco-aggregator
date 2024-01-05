@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Frontend - Scraper</title>
+</head>
+<body>
+
+<button onclick="window.history.back();">←</button>
+
+<div>
+    <strong>ID:</strong>
+    <span th:text="${scraper.id}"></span>
+</div>
+
+<div>
+    <strong>Name:</strong>
+    <span th:text="${scraper.name}"></span>
+</div>
+
+<div>
+    <strong>API key:</strong>
+    <span th:text="${scraper.apiKey}"></span>
+</div>
+
+<div>
+    <strong>Total submitted Air Quality Records:</strong>
+    <span th:text="${totalSubmittedAirQualityRecords}"></span>
+</div>
+
+<div>
+    <strong>Total submitted Radiation Records:</strong>
+    <span th:text="${totalSubmittedRadiationRecords}"></span>
+</div>
+
+<!-- Display latest submitted Air Quality Record if it exists -->
+<div th:if="${latestSubmittedAirQualityRecord != null}">
+    <h3>Latest submitted Air Quality Record:</h3>
+    <p>
+        Date: <span th:text="${#dates.format(#calendars.create(latestSubmittedAirQualityRecord.timestamp), 'yyyy-MM-dd HH:mm:ss')}"></span><br>
+        PM1.0: <span th:text="${latestSubmittedAirQualityRecord.pm10}"></span><br>
+        PM2.5: <span th:text="${latestSubmittedAirQualityRecord.pm25}"></span><br>
+        PM10.0: <span th:text="${latestSubmittedAirQualityRecord.pm100}"></span>
+    </p>
+</div>
+
+<!-- Display latest submitted Radiation Record if it exists -->
+<div th:if="${latestSubmittedRadiationRecord != null}">
+    <h3>Latest submitted Radiation Record:</h3>
+    <p>
+        Date: <span th:text="${#dates.format(#calendars.create(latestSubmittedRadiationRecord.timestamp), 'yyyy-MM-dd HH:mm:ss')}"></span><br>
+        Dose (nanoSievert): <span th:text="${latestSubmittedRadiationRecord.doseInNanoSievert}"></span>
+    </p>
+</div>
+
+</body>
+</html>

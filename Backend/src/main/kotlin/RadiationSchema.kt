@@ -74,6 +74,17 @@ class RadiationService(database: Database) {
         RadiationRecords.select { RadiationRecords.id eq id }.map { it.toRadiationRecord() }
     }.singleOrNull()
 
+    suspend fun readLatestSubmittedRecordByProvider(providerId: Int): RadiationRecord? = dbQuery {
+        RadiationRecords.select { RadiationRecords.provider eq providerId }
+            .sortedByDescending { RadiationRecords.createdAt }
+            .map { it.toRadiationRecord() }
+    }.singleOrNull()
+
+    suspend fun getTotalSubmittedRecordsByProvider(providerId: Int): Long = dbQuery {
+        RadiationRecords.select { RadiationRecords.provider eq providerId }
+            .count()
+    }
+
     suspend fun delete(id: Int) = dbQuery {
         RadiationRecords.deleteWhere { RadiationRecords.id eq id }
     }
