@@ -36,6 +36,9 @@ jobs:
     - name: Build Scraper API JAR
       run: ./gradlew :ScraperAPI:buildFatJar
 
+    - name: Build Admin API JAR
+      run: ./gradlew :AdminAPI:buildFatJar
+
     - name: Create a remote release
       id: create_release
       uses: actions/create-release@v1
@@ -87,6 +90,16 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ScraperAPI/build/libs/ScraperAPI-all.jar
         asset_name: ScraperAPI.jar
+        asset_content_type: application/zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    - name: Upload AdminAPI JAR
+      uses: actions/upload-release-asset@v1.0.1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: AdminAPI/build/libs/AdminAPI-all.jar
+        asset_name: AdminAPI.jar
         asset_content_type: application/zip
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
