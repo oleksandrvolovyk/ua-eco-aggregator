@@ -34,22 +34,28 @@
 </div>
 
 <!-- Display latest submitted Air Quality Record if it exists -->
-<div th:if="${latestSubmittedAirQualityRecord != null}">
+<div th:if="${latestSubmittedAirQualityRecord}">
     <h3>Latest submitted Air Quality Record:</h3>
     <p>
-        Date: <span th:text="${#dates.format(#calendars.create(latestSubmittedAirQualityRecord.timestamp), 'yyyy-MM-dd HH:mm:ss')}"></span><br>
+        Submitted at: <span th:text="${latestSubmittedAirQualityRecord.createdAt}"></span><br>
+        Timestamp: <span th:text="${latestSubmittedAirQualityRecord.timestamp}"></span><br>
         PM1.0: <span th:text="${latestSubmittedAirQualityRecord.pm10}"></span><br>
         PM2.5: <span th:text="${latestSubmittedAirQualityRecord.pm25}"></span><br>
-        PM10.0: <span th:text="${latestSubmittedAirQualityRecord.pm100}"></span>
+        PM10.0: <span th:text="${latestSubmittedAirQualityRecord.pm100}"></span><br>
+        <br>
+        Location: <span th:text="${latestSubmittedAirQualityRecord.latitude}"></span> <span th:text="${latestSubmittedAirQualityRecord.longitude}"></span>
     </p>
 </div>
 
 <!-- Display latest submitted Radiation Record if it exists -->
-<div th:if="${latestSubmittedRadiationRecord != null}">
+<div th:if="${latestSubmittedRadiationRecord}">
     <h3>Latest submitted Radiation Record:</h3>
     <p>
-        Date: <span th:text="${#dates.format(#calendars.create(latestSubmittedRadiationRecord.timestamp), 'yyyy-MM-dd HH:mm:ss')}"></span><br>
-        Dose (nanoSievert): <span th:text="${latestSubmittedRadiationRecord.doseInNanoSievert}"></span>
+        Submitted at: <span th:text="${latestSubmittedRadiationRecord.createdAt}"></span><br>
+        Timestamp: <span th:text="${latestSubmittedRadiationRecord.timestamp}"></span><br>
+        Dose (nanoSievert): <span th:text="${latestSubmittedRadiationRecord.doseInNanoSievert}"></span><br>
+        <br>
+        Location: <span th:text="${latestSubmittedRadiationRecord.latitude}"></span> <span th:text="${latestSubmittedRadiationRecord.longitude}"></span>
     </p>
 </div>
 

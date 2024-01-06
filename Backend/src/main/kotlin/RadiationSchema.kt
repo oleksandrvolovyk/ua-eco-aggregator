@@ -76,9 +76,9 @@ class RadiationService(database: Database) {
 
     suspend fun readLatestSubmittedRecordByProvider(providerId: Int): RadiationRecord? = dbQuery {
         RadiationRecords.select { RadiationRecords.provider eq providerId }
-            .sortedByDescending { RadiationRecords.createdAt }
-            .map { it.toRadiationRecord() }
-    }.singleOrNull()
+            .maxByOrNull { RadiationRecords.createdAt }
+            ?.toRadiationRecord()
+    }
 
     suspend fun getTotalSubmittedRecordsByProvider(providerId: Int): Long = dbQuery {
         RadiationRecords.select { RadiationRecords.provider eq providerId }

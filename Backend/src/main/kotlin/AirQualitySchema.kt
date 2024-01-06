@@ -80,9 +80,9 @@ class AirQualityService(database: Database) {
 
     suspend fun readLatestSubmittedRecordByProvider(providerId: Int): AirQualityRecord? = dbQuery {
         AirQualityRecords.select { AirQualityRecords.provider eq providerId }
-            .sortedByDescending { AirQualityRecords.createdAt }
-            .map { it.toAirQualityRecord() }
-    }.singleOrNull()
+            .maxByOrNull { AirQualityRecords.createdAt }
+            ?.toAirQualityRecord()
+    }
 
     suspend fun getTotalSubmittedRecordsByProvider(providerId: Int): Long = dbQuery {
         AirQualityRecords.select { AirQualityRecords.provider eq providerId }
