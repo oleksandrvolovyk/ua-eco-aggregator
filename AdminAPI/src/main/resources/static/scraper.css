@@ -1,0 +1,41 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #ecf4f2;
+    color: #333;
+    margin: 20px;
+}
+
+button {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+div {
+    margin-bottom: 15px;
+}
+
+strong {
+    color: #008080;
+}
+
+h3 {
+    color: #008080;
+}
+
+.record-group {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.record-group h3 {
+    margin-top: 0;
+}
+
+p {
+    margin-bottom: 10px;
+}
