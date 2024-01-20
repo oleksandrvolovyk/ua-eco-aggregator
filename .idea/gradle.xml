@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/EcoCityScraper" />
             <option value="$PROJECT_DIR$/LunMistoScraper" />
             <option value="$PROJECT_DIR$/MeteoGovUaScraper" />
+            <option value="$PROJECT_DIR$/PublicAPI" />
             <option value="$PROJECT_DIR$/ScraperAPI" />
             <option value="$PROJECT_DIR$/SensorCommunityScraper" />
           </set>
