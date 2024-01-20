@@ -10,18 +10,18 @@ import java.time.Instant
 
 const val PAGE_SIZE = 50
 
-enum class SortField {
-    TIMESTAMP,
-    PM25,
-    PM100
-}
-
 enum class SortDirection {
     ASCENDING,
     DESCENDING
 }
 
 class AirQualityService(database: Database) {
+
+    enum class SortField {
+        TIMESTAMP,
+        PM25,
+        PM100
+    }
 
     val scraperService by inject<ScraperService>(ScraperService::class.java)
 

@@ -10,6 +10,11 @@ import java.time.Instant
 
 class RadiationService(database: Database) {
 
+    enum class SortField {
+        TIMESTAMP,
+        DOSE
+    }
+
     val scraperService by inject<ScraperService>(ScraperService::class.java)
 
     object RadiationRecords : Table() {
@@ -68,6 +73,54 @@ class RadiationService(database: Database) {
 
     suspend fun readAll(): List<RadiationRecord> = dbQuery {
         RadiationRecords.selectAll().map { it.toRadiationRecord() }
+    }
+
+    suspend fun readPaginated(
+        providerId: Int?,
+        timestampStart: Long?,
+        timestampEnd: Long?,
+        sortField: SortField,
+        sortDirection: SortDirection,
+        page: Long
+    ): List<RadiationRecord> = dbQuery {
+        var query = RadiationRecords.selectAll()
+        // 1. Apply filters
+        // 1.1 Filter by providerId
+        if (providerId != null) {
+            query = query.andWhere { RadiationRecords.provider eq providerId }
+        }
+
+        // 1.2 Filter by time period
+        if (timestampStart != null && timestampEnd != null) {
+            query =
+                query.andWhere { (RadiationRecords.timestamp greaterEq timestampStart) and (RadiationRecords.timestamp lessEq timestampEnd) }
+        }
+
+        // 2. Apply sorting
+        query = when (sortField) {
+            SortField.TIMESTAMP -> query.orderBy(
+                RadiationRecords.timestamp to (
+                        if (sortDirection == SortDirection.ASCENDING)
+                            SortOrder.ASC
+                        else
+                            SortOrder.DESC
+                        )
+            )
+
+            SortField.DOSE -> query.orderBy(
+                RadiationRecords.doseInNanoSievert to (
+                        if (sortDirection == SortDirection.ASCENDING)
+                            SortOrder.ASC
+                        else
+                            SortOrder.DESC
+                        )
+            )
+        }
+
+        // 3. Apply paging
+        return@dbQuery query
+            .limit(PAGE_SIZE, page * PAGE_SIZE)
+            .map { it.toRadiationRecord() }
     }
 
     suspend fun read(id: Int): RadiationRecord? = dbQuery {

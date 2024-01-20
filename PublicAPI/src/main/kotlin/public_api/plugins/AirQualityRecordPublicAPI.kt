@@ -2,7 +2,6 @@ package public_api.plugins
 
 import AirQualityService
 import SortDirection
-import SortField
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -25,10 +24,10 @@ fun Application.configureAirQualityRecordPublicAPI() {
 
                     // Sort by timestamp OR sort by pm25 or pm100
                     val sortField = when (call.parameters["sortField"]) {
-                        "timestamp" -> SortField.TIMESTAMP
-                        "pm25" -> SortField.PM25
-                        "pm100" -> SortField.PM100
-                        else -> SortField.TIMESTAMP
+                        "timestamp" -> AirQualityService.SortField.TIMESTAMP
+                        "pm25" -> AirQualityService.SortField.PM25
+                        "pm100" -> AirQualityService.SortField.PM100
+                        else -> AirQualityService.SortField.TIMESTAMP
                     }
 
                     val sortDirection = when (call.parameters["sortDirection"]) {
