@@ -8,6 +8,19 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.java.KoinJavaComponent.inject
 import java.time.Instant
 
+const val PAGE_SIZE = 50
+
+enum class SortField {
+    TIMESTAMP,
+    PM25,
+    PM100
+}
+
+enum class SortDirection {
+    ASCENDING,
+    DESCENDING
+}
+
 class AirQualityService(database: Database) {
 
     val scraperService by inject<ScraperService>(ScraperService::class.java)
@@ -72,6 +85,63 @@ class AirQualityService(database: Database) {
 
     suspend fun readAll(): List<AirQualityRecord> = dbQuery {
         AirQualityRecords.selectAll().map { it.toAirQualityRecord() }
+    }
+
+    suspend fun readPaginated(
+        providerId: Int?,
+        timestampStart: Long?,
+        timestampEnd: Long?,
+        sortField: SortField,
+        sortDirection: SortDirection,
+        page: Long
+    ): List<AirQualityRecord> = dbQuery {
+        var query = AirQualityRecords.selectAll()
+        // 1. Apply filters
+        // 1.1 Filter by providerId
+        if (providerId != null) {
+            query = query.andWhere { AirQualityRecords.provider eq providerId }
+        }
+
+        // 1.2 Filter by time period
+        if (timestampStart != null && timestampEnd != null) {
+            query =
+                query.andWhere { (AirQualityRecords.timestamp greaterEq timestampStart) and (AirQualityRecords.timestamp lessEq timestampEnd) }
+        }
+
+        // 2. Apply sorting
+        query = when (sortField) {
+            SortField.TIMESTAMP -> query.orderBy(
+                AirQualityRecords.timestamp to (
+                        if (sortDirection == SortDirection.ASCENDING)
+                            SortOrder.ASC
+                        else
+                            SortOrder.DESC
+                        )
+            )
+
+            SortField.PM25 -> query.orderBy(
+                AirQualityRecords.pm25 to (
+                        if (sortDirection == SortDirection.ASCENDING)
+                            SortOrder.ASC
+                        else
+                            SortOrder.DESC
+                        )
+            )
+
+            SortField.PM100 -> query.orderBy(
+                AirQualityRecords.pm100 to (
+                        if (sortDirection == SortDirection.ASCENDING)
+                            SortOrder.ASC
+                        else
+                            SortOrder.DESC
+                        )
+            )
+        }
+
+        // 3. Apply paging
+        return@dbQuery query
+            .limit(PAGE_SIZE, page * PAGE_SIZE)
+            .map { it.toAirQualityRecord() }
     }
 
     suspend fun read(id: Int): AirQualityRecord? = dbQuery {
