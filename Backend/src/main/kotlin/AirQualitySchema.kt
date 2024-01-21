@@ -150,7 +150,9 @@ class AirQualityService(database: Database) {
 
     suspend fun readLatestSubmittedRecordByProvider(providerId: Int): AirQualityRecord? = dbQuery {
         AirQualityRecords.select { AirQualityRecords.provider eq providerId }
-            .maxByOrNull { AirQualityRecords.createdAt }
+            .orderBy(AirQualityRecords.createdAt to SortOrder.DESC)
+            .limit(1)
+            .firstOrNull()
             ?.toAirQualityRecord()
     }
 

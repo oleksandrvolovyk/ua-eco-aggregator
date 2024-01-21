@@ -129,7 +129,9 @@ class RadiationService(database: Database) {
 
     suspend fun readLatestSubmittedRecordByProvider(providerId: Int): RadiationRecord? = dbQuery {
         RadiationRecords.select { RadiationRecords.provider eq providerId }
-            .maxByOrNull { RadiationRecords.createdAt }
+            .orderBy(RadiationRecords.createdAt to SortOrder.DESC)
+            .limit(1)
+            .firstOrNull()
             ?.toRadiationRecord()
     }
 
