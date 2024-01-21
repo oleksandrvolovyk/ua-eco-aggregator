@@ -8,6 +8,19 @@ services:
       POSTGRES_PASSWORD: postgres_pass
       POSTGRES_DB: environment
 
+  public-api:
+    build: ./PublicAPI/.
+    depends_on:
+      - postgres
+    ports:
+      - "8082:8080"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASS: postgres_pass
+      POSTGRES_DB_NAME: environment
+
   admin-api:
     build: ./AdminAPI/.
     depends_on:
