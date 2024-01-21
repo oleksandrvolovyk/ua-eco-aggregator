@@ -33,6 +33,9 @@ jobs:
     - name: Build MeteoGovUaScraper app JAR
       run: ./gradlew :MeteoGovUaScraper:buildFatJar
 
+    - name: Build Public API JAR
+      run: ./gradlew :PublicAPI:buildFatJar
+
     - name: Build Scraper API JAR
       run: ./gradlew :ScraperAPI:buildFatJar
 
@@ -80,6 +83,16 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: MeteoGovUaScraper/build/libs/MeteoGovUaScraper-all.jar
         asset_name: MeteoGovUaScraper.jar
+        asset_content_type: application/zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    - name: Upload PublicAPI JAR
+      uses: actions/upload-release-asset@v1.0.1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: PublicAPI/build/libs/PublicAPI-all.jar
+        asset_name: PublicAPI.jar
         asset_content_type: application/zip
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
