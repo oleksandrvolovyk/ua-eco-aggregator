@@ -27,7 +27,14 @@ val BackendKoinModule = module {
             password = password
         )
     }
-    single { ScraperService(get()) }
-    single { AirQualityService(get()) }
-    single { RadiationService(get()) }
+
+    val pageSize = try {
+        System.getenv("PAGE_SIZE").toIntOrNull() ?: 50
+    } catch (_: NullPointerException) {
+        50
+    }
+
+    single { ScraperService(database = get()) }
+    single { AirQualityService(database = get(), pageSize = pageSize) }
+    single { RadiationService(database = get(), pageSize = pageSize) }
 }

@@ -8,7 +8,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.java.KoinJavaComponent.inject
 import java.time.Instant
 
-class RadiationService(database: Database) {
+class RadiationService(database: Database, private val pageSize: Int) {
 
     enum class SortField {
         TIMESTAMP,
@@ -119,7 +119,7 @@ class RadiationService(database: Database) {
 
         // 3. Apply paging
         return@dbQuery query
-            .limit(PAGE_SIZE, page * PAGE_SIZE)
+            .limit(pageSize, page * pageSize)
             .map { it.toRadiationRecord() }
     }
 

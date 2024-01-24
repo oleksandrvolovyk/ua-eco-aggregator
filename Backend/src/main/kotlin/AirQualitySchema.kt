@@ -8,14 +8,12 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.java.KoinJavaComponent.inject
 import java.time.Instant
 
-const val PAGE_SIZE = 50
-
 enum class SortDirection {
     ASCENDING,
     DESCENDING
 }
 
-class AirQualityService(database: Database) {
+class AirQualityService(database: Database, private val pageSize: Int) {
 
     enum class SortField {
         TIMESTAMP,
@@ -140,7 +138,7 @@ class AirQualityService(database: Database) {
 
         // 3. Apply paging
         return@dbQuery query
-            .limit(PAGE_SIZE, page * PAGE_SIZE)
+            .limit(pageSize, page * pageSize)
             .map { it.toAirQualityRecord() }
     }
 
