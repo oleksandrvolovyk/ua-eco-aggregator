@@ -1,6 +1,7 @@
 import kotlinx.coroutines.Dispatchers
 import model.AirQualityRecord
 import model.AirQualityRecordDTO
+import model.PaginatedData
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
@@ -92,7 +93,7 @@ class AirQualityService(database: Database, private val pageSize: Int) {
         sortField: SortField,
         sortDirection: SortDirection,
         page: Long
-    ): List<AirQualityRecord> = dbQuery {
+    ): PaginatedData<AirQualityRecord> = dbQuery {
         var query = AirQualityRecords.selectAll()
         // 1. Apply filters
         // 1.1 Filter by providerId
@@ -136,10 +137,20 @@ class AirQualityService(database: Database, private val pageSize: Int) {
             )
         }
 
+        val totalAirQualityRecords = query.count()
+
         // 3. Apply paging
-        return@dbQuery query
+        val data = query
             .limit(pageSize, page * pageSize)
             .map { it.toAirQualityRecord() }
+
+        return@dbQuery PaginatedData(
+            page = page,
+            maxPageNumber = totalAirQualityRecords / pageSize,
+            itemsPerPage = pageSize,
+            totalItemsCount = totalAirQualityRecords,
+            data = data
+        )
     }
 
     suspend fun read(id: Int): AirQualityRecord? = dbQuery {

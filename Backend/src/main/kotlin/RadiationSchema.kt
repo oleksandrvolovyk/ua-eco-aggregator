@@ -1,4 +1,5 @@
 import kotlinx.coroutines.Dispatchers
+import model.PaginatedData
 import model.RadiationRecord
 import model.RadiationRecordDTO
 import org.jetbrains.exposed.sql.*
@@ -82,7 +83,7 @@ class RadiationService(database: Database, private val pageSize: Int) {
         sortField: SortField,
         sortDirection: SortDirection,
         page: Long
-    ): List<RadiationRecord> = dbQuery {
+    ): PaginatedData<RadiationRecord> = dbQuery {
         var query = RadiationRecords.selectAll()
         // 1. Apply filters
         // 1.1 Filter by providerId
@@ -117,10 +118,20 @@ class RadiationService(database: Database, private val pageSize: Int) {
             )
         }
 
+        val totalRadiationRecords = query.count()
+
         // 3. Apply paging
-        return@dbQuery query
+        val data =  query
             .limit(pageSize, page * pageSize)
             .map { it.toRadiationRecord() }
+
+        return@dbQuery PaginatedData(
+            page = page,
+            maxPageNumber = totalRadiationRecords / pageSize,
+            itemsPerPage = pageSize,
+            totalItemsCount = totalRadiationRecords,
+            data = data
+        )
     }
 
     suspend fun read(id: Int): RadiationRecord? = dbQuery {
