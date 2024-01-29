@@ -22,6 +22,10 @@ fun Application.configureAirQualityRecordPublicAPI() {
                     val timestampStart = call.parameters["timestampStart"]?.toLong()
                     val timestampEnd = call.parameters["timestampEnd"]?.toLong()
 
+                    // Filter by location (latitude, longitude)
+                    val latitude = call.parameters["latitude"]?.toDouble()
+                    val longitude = call.parameters["longitude"]?.toDouble()
+
                     // Sort by timestamp OR sort by pm25 or pm100
                     val sortField = when (call.parameters["sortField"]) {
                         "timestamp" -> AirQualityService.SortField.TIMESTAMP
@@ -42,6 +46,10 @@ fun Application.configureAirQualityRecordPublicAPI() {
                         throw IllegalArgumentException("No timestampEnd provided!")
                     } else if (timestampStart == null && timestampEnd != null) {
                         throw IllegalArgumentException("No timestampStart provided!")
+                    } else if (latitude != null && longitude == null) {
+                        throw IllegalArgumentException("No longitude provided!")
+                    } else if (latitude == null && longitude != null) {
+                        throw IllegalArgumentException("No latitude provided!")
                     } else {
                         call.respond(
                             HttpStatusCode.OK,
@@ -49,6 +57,8 @@ fun Application.configureAirQualityRecordPublicAPI() {
                                 providerId = providerId,
                                 timestampStart = timestampStart,
                                 timestampEnd = timestampEnd,
+                                latitude = latitude,
+                                longitude = longitude,
                                 sortField = sortField,
                                 sortDirection = sortDirection,
                                 page = page

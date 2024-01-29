@@ -80,6 +80,8 @@ class RadiationService(database: Database, private val pageSize: Int) {
         providerId: Int?,
         timestampStart: Long?,
         timestampEnd: Long?,
+        latitude: Double?,
+        longitude: Double?,
         sortField: SortField,
         sortDirection: SortDirection,
         page: Long
@@ -95,6 +97,12 @@ class RadiationService(database: Database, private val pageSize: Int) {
         if (timestampStart != null && timestampEnd != null) {
             query =
                 query.andWhere { (RadiationRecords.timestamp greaterEq timestampStart) and (RadiationRecords.timestamp lessEq timestampEnd) }
+        }
+
+        // 1.3 Filter by location
+        if (latitude != null && longitude != null) {
+            query =
+                query.andWhere { (RadiationRecords.latitude eq latitude) and (RadiationRecords.longitude eq longitude) }
         }
 
         // 2. Apply sorting
