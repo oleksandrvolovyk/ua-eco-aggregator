@@ -56,6 +56,16 @@ fun Application.configureAirQualityRecordPublicAPI() {
                         )
                     }
                 }
+
+                get("/{id}") {
+                    val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
+                    val record = airQualityService.read(id)
+                    if (record != null) {
+                        call.respond(HttpStatusCode.OK, record)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
             }
         }
     }
