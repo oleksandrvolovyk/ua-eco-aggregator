@@ -79,6 +79,6 @@ services:
     depends_on:
       - scraper-api
     environment:
-      SCRAPING_API_URL: "http://scraper-api:8080/radiation-records"
+      SCRAPING_API_URL: "http://scraper-api:8080/air-quality-records"
       SCRAPING_API_KEY: "save-dnipro-scraper"
       POLLING_DELAY_IN_SECONDS: 3720 # every 62 minutes
