@@ -1,4 +1,4 @@
-package volovyk.eco_aggregator.model
+package model
 
 data class SensorData(
     val id: String,

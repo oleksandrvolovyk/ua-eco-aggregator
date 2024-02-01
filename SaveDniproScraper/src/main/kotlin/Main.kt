@@ -1,5 +1,3 @@
-package volovyk.eco_aggregator
-
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -12,8 +10,8 @@ import io.ktor.serialization.gson.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import model.AirQualityRecordDTO
-import volovyk.eco_aggregator.model.Pollutant
-import volovyk.eco_aggregator.model.SensorData
+import model.Pollutant
+import model.SensorData
 import java.text.SimpleDateFormat
 
 val SCRAPING_API_URL = System.getenv("SCRAPING_API_URL")
