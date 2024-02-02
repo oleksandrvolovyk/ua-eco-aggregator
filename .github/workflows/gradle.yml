@@ -36,6 +36,9 @@ jobs:
     - name: Build SaveDniproScraper app JAR
       run: ./gradlew :SaveDniproScraper:buildFatJar
 
+    - name: Build EcoZagrozaGovUaScraper app JAR
+      run: ./gradlew :EcoZagrozaGovUaScraper:buildFatJar
+
     - name: Build Public API JAR
       run: ./gradlew :PublicAPI:buildFatJar
 
@@ -96,6 +99,16 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: SaveDniproScraper/build/libs/SaveDniproScraper-all.jar
         asset_name: SaveDniproScraper.jar
+        asset_content_type: application/zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    - name: Upload EcoZagrozaGovUaScraper JAR
+      uses: actions/upload-release-asset@v1.0.1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: EcoZagrozaGovUaScraper/build/libs/EcoZagrozaGovUaScraper-all.jar
+        asset_name: EcoZagrozaGovUaScraper.jar
         asset_content_type: application/zip
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
