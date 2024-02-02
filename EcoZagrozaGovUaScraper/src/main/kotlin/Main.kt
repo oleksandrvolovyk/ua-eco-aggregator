@@ -29,9 +29,9 @@ fun main() = runBlocking {
         }
     }
 
-    val timestamp = System.currentTimeMillis() / 1000
-
     while (true) {
+        val timestamp = System.currentTimeMillis() / 1000
+
         val sensorDatas: List<SensorData> = client
             .get("https://sensor.ecozagroza.gov.ua/api/sensors?layer=radiation")
             .body()
