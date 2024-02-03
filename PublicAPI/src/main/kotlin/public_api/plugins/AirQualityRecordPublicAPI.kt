@@ -67,6 +67,13 @@ fun Application.configureAirQualityRecordPublicAPI() {
                     }
                 }
 
+                get("/latest") {
+                    call.respond(
+                        HttpStatusCode.OK,
+                        airQualityService.readLatestSubmittedRecordsWithDistinctLocations()
+                    )
+                }
+
                 get("/{id}") {
                     val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
                     val record = airQualityService.read(id)

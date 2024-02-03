@@ -129,7 +129,7 @@ class RadiationService(database: Database, private val pageSize: Int) {
         val totalRadiationRecords = query.count()
 
         // 3. Apply paging
-        val data =  query
+        val data = query
             .limit(pageSize, page * pageSize)
             .map { it.toRadiationRecord() }
 
@@ -140,6 +140,35 @@ class RadiationService(database: Database, private val pageSize: Int) {
             totalItemsCount = totalRadiationRecords,
             data = data
         )
+    }
+
+    suspend fun readLatestSubmittedRecordsWithDistinctLocations(): List<RadiationRecord> = newSuspendedTransaction {
+        val result = arrayListOf<RadiationRecord>()
+        exec(
+            "SELECT t1.*\n" +
+                    "FROM radiationrecords t1\n" +
+                    "JOIN (\n" +
+                    "    SELECT latitude, longitude, MAX(timestamp) AS latest_timestamp\n" +
+                    "    FROM radiationrecords\n" +
+                    "    GROUP BY latitude, longitude\n" +
+                    ") t2 ON t1.latitude = t2.latitude AND t1.longitude = t2.longitude AND t1.timestamp = t2.latest_timestamp;"
+        ) { resultSet ->
+            while (resultSet.next()) {
+                result += RadiationRecord(
+                    id = resultSet.getInt(RadiationRecords.id.nameInDatabaseCase()),
+                    latitude = resultSet.getDouble(RadiationRecords.latitude.nameInDatabaseCase()),
+                    longitude = resultSet.getDouble(RadiationRecords.longitude.nameInDatabaseCase()),
+                    timestamp = resultSet.getLong(RadiationRecords.timestamp.nameInDatabaseCase()),
+                    doseInNanoSievert = resultSet.getInt(RadiationRecords.doseInNanoSievert.nameInDatabaseCase()),
+                    providerId = resultSet.getInt(RadiationRecords.provider.nameInDatabaseCase()),
+                    metadata = resultSet.getString(RadiationRecords.metadata.nameInDatabaseCase()),
+                    createdAt = resultSet.getLong(RadiationRecords.createdAt.nameInDatabaseCase())
+                )
+            }
+            result
+        }
+
+        return@newSuspendedTransaction result
     }
 
     suspend fun read(id: Int): RadiationRecord? = dbQuery {

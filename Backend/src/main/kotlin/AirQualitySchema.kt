@@ -161,6 +161,37 @@ class AirQualityService(database: Database, private val pageSize: Int) {
         )
     }
 
+    suspend fun readLatestSubmittedRecordsWithDistinctLocations(): List<AirQualityRecord> = newSuspendedTransaction {
+        val result = arrayListOf<AirQualityRecord>()
+        exec(
+            "SELECT t1.*\n" +
+                    "FROM airqualityrecords t1\n" +
+                    "JOIN (\n" +
+                    "    SELECT latitude, longitude, MAX(timestamp) AS latest_timestamp\n" +
+                    "    FROM airqualityrecords\n" +
+                    "    GROUP BY latitude, longitude\n" +
+                    ") t2 ON t1.latitude = t2.latitude AND t1.longitude = t2.longitude AND t1.timestamp = t2.latest_timestamp;"
+        ) { resultSet ->
+            while (resultSet.next()) {
+                result += AirQualityRecord(
+                    id = resultSet.getInt(AirQualityRecords.id.nameInDatabaseCase()),
+                    latitude = resultSet.getDouble(AirQualityRecords.latitude.nameInDatabaseCase()),
+                    longitude = resultSet.getDouble(AirQualityRecords.longitude.nameInDatabaseCase()),
+                    timestamp = resultSet.getLong(AirQualityRecords.timestamp.nameInDatabaseCase()),
+                    pm10 = resultSet.getObject(AirQualityRecords.pm10.nameInDatabaseCase()) as Float?,
+                    pm25 = resultSet.getFloat(AirQualityRecords.pm25.nameInDatabaseCase()),
+                    pm100 = resultSet.getFloat(AirQualityRecords.pm100.nameInDatabaseCase()),
+                    providerId = resultSet.getInt(AirQualityRecords.provider.nameInDatabaseCase()),
+                    metadata = resultSet.getString(AirQualityRecords.metadata.nameInDatabaseCase()),
+                    createdAt = resultSet.getLong(AirQualityRecords.createdAt.nameInDatabaseCase())
+                )
+            }
+            result
+        }
+
+        return@newSuspendedTransaction result
+    }
+
     suspend fun read(id: Int): AirQualityRecord? = dbQuery {
         AirQualityRecords.select { AirQualityRecords.id eq id }.map { it.toAirQualityRecord() }
     }.singleOrNull()

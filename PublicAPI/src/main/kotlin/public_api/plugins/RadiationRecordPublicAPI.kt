@@ -65,6 +65,13 @@ fun Application.configureRadiationRecordPublicAPI() {
                     }
                 }
 
+                get("/latest") {
+                    call.respond(
+                        HttpStatusCode.OK,
+                        radiationService.readLatestSubmittedRecordsWithDistinctLocations()
+                    )
+                }
+
                 get("/{id}") {
                     val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
                     val record = radiationService.read(id)
