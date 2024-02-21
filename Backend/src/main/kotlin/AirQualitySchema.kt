@@ -7,6 +7,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.java.KoinJavaComponent.inject
+import java.math.BigDecimal
 import java.time.Instant
 
 enum class SortDirection {
@@ -170,7 +171,7 @@ class AirQualityService(database: Database, private val pageSize: Int) {
                     "    SELECT latitude, longitude, MAX(timestamp) AS latest_timestamp\n" +
                     "    FROM airqualityrecords\n" +
                     "    GROUP BY latitude, longitude\n" +
-                    ") t2 ON t1.latitude = t2.latitude AND t1.longitude = t2.longitude AND t1.timestamp = t2.latest_timestamp;"
+                    ") t2 ON t1.latitude = t2.latitude AND t1.longitude = t2.longitude AND t1.timestamp = t2.latest_timestamp"
         ) { resultSet ->
             while (resultSet.next()) {
                 result += AirQualityRecord(
@@ -178,7 +179,7 @@ class AirQualityService(database: Database, private val pageSize: Int) {
                     latitude = resultSet.getDouble(AirQualityRecords.latitude.nameInDatabaseCase()),
                     longitude = resultSet.getDouble(AirQualityRecords.longitude.nameInDatabaseCase()),
                     timestamp = resultSet.getLong(AirQualityRecords.timestamp.nameInDatabaseCase()),
-                    pm10 = resultSet.getObject(AirQualityRecords.pm10.nameInDatabaseCase()) as Float?,
+                    pm10 = (resultSet.getObject(AirQualityRecords.pm10.nameInDatabaseCase()) as BigDecimal?)?.toFloat(),
                     pm25 = resultSet.getFloat(AirQualityRecords.pm25.nameInDatabaseCase()),
                     pm100 = resultSet.getFloat(AirQualityRecords.pm100.nameInDatabaseCase()),
                     providerId = resultSet.getInt(AirQualityRecords.provider.nameInDatabaseCase()),

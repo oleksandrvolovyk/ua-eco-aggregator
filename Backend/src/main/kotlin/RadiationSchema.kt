@@ -151,7 +151,7 @@ class RadiationService(database: Database, private val pageSize: Int) {
                     "    SELECT latitude, longitude, MAX(timestamp) AS latest_timestamp\n" +
                     "    FROM radiationrecords\n" +
                     "    GROUP BY latitude, longitude\n" +
-                    ") t2 ON t1.latitude = t2.latitude AND t1.longitude = t2.longitude AND t1.timestamp = t2.latest_timestamp;"
+                    ") t2 ON t1.latitude = t2.latitude AND t1.longitude = t2.longitude AND t1.timestamp = t2.latest_timestamp"
         ) { resultSet ->
             while (resultSet.next()) {
                 result += RadiationRecord(
