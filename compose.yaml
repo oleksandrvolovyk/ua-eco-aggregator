@@ -1,51 +1,30 @@
 services:
-  postgres:
-    image: postgres
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_pass
-      POSTGRES_DB: environment
-
   public-api:
     build: ./PublicAPI/.
-    depends_on:
-      - postgres
     ports:
       - "8082:8080"
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PASS: postgres_pass
-      POSTGRES_DB_NAME: environment
+      DB_CONNECTION_STRING: "insert connection string"
+      DB_USER: "insert username"
+      DB_PASS: "insert password"
 
   admin-api:
     build: ./AdminAPI/.
-    depends_on:
-      - postgres
     ports:
       - "8081:8080"
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PASS: postgres_pass
-      POSTGRES_DB_NAME: environment
+      DB_CONNECTION_STRING: "insert connection string"
+      DB_USER: "insert username"
+      DB_PASS: "insert password"
 
   scraper-api:
     build: ./ScraperAPI/.
-    depends_on:
-      - postgres
     ports:
       - "8080:8080"
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PASS: postgres_pass
-      POSTGRES_DB_NAME: environment
+      DB_CONNECTION_STRING: "insert connection string"
+      DB_USER: "insert username"
+      DB_PASS: "insert password"
 
   lun-misto-scraper:
     build: ./LunMistoScraper/.

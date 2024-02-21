@@ -25,7 +25,7 @@ dependencies {
     // Exposed
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
-    implementation("org.postgresql:postgresql:$postgresql_version")
+    implementation("com.oracle.database.jdbc:ojdbc11:23.2.0.0")
 }
 
 tasks.test {
