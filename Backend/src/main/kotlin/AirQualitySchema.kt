@@ -2,12 +2,14 @@ import kotlinx.coroutines.Dispatchers
 import model.AirQualityRecord
 import model.AirQualityRecordDTO
 import model.PaginatedData
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.java.KoinJavaComponent.inject
 import java.math.BigDecimal
+import java.sql.SQLIntegrityConstraintViolationException
 import java.time.Instant
 
 enum class SortDirection {
@@ -58,17 +60,21 @@ class AirQualityService(database: Database, private val pageSize: Int) {
     private suspend fun create(airQualityRecordDTO: AirQualityRecordDTO): Boolean {
         val scraper = scraperService.getByApiKey(airQualityRecordDTO.apiKey)!!
 
-        return AirQualityRecords.insertIgnore {
-            it[latitude] = airQualityRecordDTO.latitude
-            it[longitude] = airQualityRecordDTO.longitude
-            it[timestamp] = airQualityRecordDTO.timestamp
-            it[pm10] = airQualityRecordDTO.pm10
-            it[pm25] = airQualityRecordDTO.pm25
-            it[pm100] = airQualityRecordDTO.pm100
-            it[provider] = scraper.id
-            it[metadata] = airQualityRecordDTO.metadata
-            it[createdAt] = Instant.now().epochSecond
-        }.insertedCount != 0
+        return try {
+            AirQualityRecords.insert {
+                it[latitude] = airQualityRecordDTO.latitude
+                it[longitude] = airQualityRecordDTO.longitude
+                it[timestamp] = airQualityRecordDTO.timestamp
+                it[pm10] = airQualityRecordDTO.pm10
+                it[pm25] = airQualityRecordDTO.pm25
+                it[pm100] = airQualityRecordDTO.pm100
+                it[provider] = scraper.id
+                it[metadata] = airQualityRecordDTO.metadata
+                it[createdAt] = Instant.now().epochSecond
+            }.insertedCount != 0
+        } catch (e: ExposedSQLException) {
+            false
+        }
     }
 
     suspend fun create(airQualityRecordDTOs: List<AirQualityRecordDTO>): Int = dbQuery {

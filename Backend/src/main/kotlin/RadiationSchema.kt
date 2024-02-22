@@ -2,6 +2,7 @@ import kotlinx.coroutines.Dispatchers
 import model.PaginatedData
 import model.RadiationRecord
 import model.RadiationRecordDTO
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
@@ -49,15 +50,19 @@ class RadiationService(database: Database, private val pageSize: Int) {
     private suspend fun create(radiationRecordDTO: RadiationRecordDTO): Boolean {
         val scraper = scraperService.getByApiKey(radiationRecordDTO.apiKey)!!
 
-        return RadiationRecords.insertIgnore {
-            it[latitude] = radiationRecordDTO.latitude
-            it[longitude] = radiationRecordDTO.longitude
-            it[timestamp] = radiationRecordDTO.timestamp
-            it[doseInNanoSievert] = radiationRecordDTO.doseInNanoSievert
-            it[provider] = scraper.id
-            it[metadata] = radiationRecordDTO.metadata
-            it[createdAt] = Instant.now().epochSecond
-        }.insertedCount != 0
+        return try {
+            RadiationRecords.insert {
+                it[latitude] = radiationRecordDTO.latitude
+                it[longitude] = radiationRecordDTO.longitude
+                it[timestamp] = radiationRecordDTO.timestamp
+                it[doseInNanoSievert] = radiationRecordDTO.doseInNanoSievert
+                it[provider] = scraper.id
+                it[metadata] = radiationRecordDTO.metadata
+                it[createdAt] = Instant.now().epochSecond
+            }.insertedCount != 0
+        } catch (e: ExposedSQLException) {
+            false
+        }
     }
 
     suspend fun create(radiationRecordDTOs: List<RadiationRecordDTO>): Int = dbQuery {
