@@ -9,7 +9,6 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.java.KoinJavaComponent.inject
 import java.math.BigDecimal
-import java.sql.SQLIntegrityConstraintViolationException
 import java.time.Instant
 
 enum class SortDirection {
@@ -168,17 +167,24 @@ class AirQualityService(database: Database, private val pageSize: Int) {
         )
     }
 
-    suspend fun readLatestSubmittedRecordsWithDistinctLocations(): List<AirQualityRecord> = newSuspendedTransaction {
+    suspend fun readLatestSubmittedRecordsWithDistinctLocations(
+        at: Long? = null
+    ): List<AirQualityRecord> = newSuspendedTransaction {
         val result = arrayListOf<AirQualityRecord>()
-        exec(
-            "SELECT t1.*\n" +
-                    "FROM airqualityrecords t1\n" +
-                    "JOIN (\n" +
-                    "    SELECT latitude, longitude, MAX(timestamp) AS latest_timestamp\n" +
-                    "    FROM airqualityrecords\n" +
-                    "    GROUP BY latitude, longitude\n" +
-                    ") t2 ON t1.latitude = t2.latitude AND t1.longitude = t2.longitude AND t1.timestamp = t2.latest_timestamp"
-        ) { resultSet ->
+
+        val sqlStatement =
+            """
+                SELECT t1.*
+                FROM airqualityrecords t1
+                JOIN (
+                    SELECT latitude, longitude, MAX(timestamp) AS latest_timestamp
+                    FROM airqualityrecords
+                    ${if (at != null) "WHERE timestamp < $at" else ""}
+                    GROUP BY latitude, longitude
+                ) t2 ON t1.latitude = t2.latitude AND t1.longitude = t2.longitude AND t1.timestamp = t2.latest_timestamp
+            """.trimIndent()
+
+        exec(sqlStatement) { resultSet ->
             while (resultSet.next()) {
                 result += AirQualityRecord(
                     id = resultSet.getInt(AirQualityRecords.id.nameInDatabaseCase()),

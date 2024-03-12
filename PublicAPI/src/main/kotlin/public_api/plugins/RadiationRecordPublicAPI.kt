@@ -66,9 +66,12 @@ fun Application.configureRadiationRecordPublicAPI() {
                 }
 
                 get("/latest") {
+                    // Optional parameter to get latest records at given timestamp (to get historical data)
+                    val at = call.parameters["at"]?.toLong()
+
                     call.respond(
                         HttpStatusCode.OK,
-                        radiationService.readLatestSubmittedRecordsWithDistinctLocations()
+                        radiationService.readLatestSubmittedRecordsWithDistinctLocations(at)
                     )
                 }
 

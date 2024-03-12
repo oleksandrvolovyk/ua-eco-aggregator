@@ -68,9 +68,12 @@ fun Application.configureAirQualityRecordPublicAPI() {
                 }
 
                 get("/latest") {
+                    // Optional parameter to get latest records at given timestamp (to get historical data)
+                    val at = call.parameters["at"]?.toLong()
+
                     call.respond(
                         HttpStatusCode.OK,
-                        airQualityService.readLatestSubmittedRecordsWithDistinctLocations()
+                        airQualityService.readLatestSubmittedRecordsWithDistinctLocations(at)
                     )
                 }
 
