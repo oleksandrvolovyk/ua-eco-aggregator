@@ -148,21 +148,33 @@ class RadiationService(database: Database, private val pageSize: Int) {
     }
 
     suspend fun readLatestSubmittedRecordsWithDistinctLocations(
-        at: Long? = null
+        at: Long? = null,
+        maxAge: Long? = null
     ): List<RadiationRecord> = newSuspendedTransaction {
         val result = arrayListOf<RadiationRecord>()
-        exec(
+
+        val sqlWhereTimestamp =
+            if (at != null && maxAge != null)
+                "WHERE timestamp < $at AND timestamp > ${at - maxAge}"
+            else if (at != null)
+                "WHERE timestamp < $at"
+            else if (maxAge != null)
+                "WHERE timestamp > ${System.currentTimeMillis() / 1000 - maxAge}"
+            else ""
+
+        val sqlStatement =
             """
                 SELECT t1.*
                 FROM radiationrecords t1
                 JOIN (
                     SELECT latitude, longitude, MAX(timestamp) AS latest_timestamp
                     FROM radiationrecords
-                    ${if (at != null) "WHERE timestamp < $at" else ""}
+                    $sqlWhereTimestamp
                     GROUP BY latitude, longitude
                 ) t2 ON t1.latitude = t2.latitude AND t1.longitude = t2.longitude AND t1.timestamp = t2.latest_timestamp
             """.trimIndent()
-        ) { resultSet ->
+
+        exec(sqlStatement) { resultSet ->
             while (resultSet.next()) {
                 result += RadiationRecord(
                     id = resultSet.getInt(RadiationRecords.id.nameInDatabaseCase()),

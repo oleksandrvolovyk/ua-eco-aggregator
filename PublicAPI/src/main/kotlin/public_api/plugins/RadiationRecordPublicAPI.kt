@@ -6,6 +6,7 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
+import kotlin.math.max
 
 fun Application.configureRadiationRecordPublicAPI() {
     val radiationService by inject<RadiationService>()
@@ -68,10 +69,12 @@ fun Application.configureRadiationRecordPublicAPI() {
                 get("/latest") {
                     // Optional parameter to get latest records at given timestamp (to get historical data)
                     val at = call.parameters["at"]?.toLong()
+                    // Optional paramater to set max age for records, one day by default
+                    val maxAge = call.parameters["maxAge"]?.toLong() ?: SECONDS_IN_DAY
 
                     call.respond(
                         HttpStatusCode.OK,
-                        radiationService.readLatestSubmittedRecordsWithDistinctLocations(at)
+                        radiationService.readLatestSubmittedRecordsWithDistinctLocations(at, maxAge)
                     )
                 }
 

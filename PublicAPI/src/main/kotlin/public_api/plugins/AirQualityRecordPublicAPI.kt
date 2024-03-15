@@ -8,6 +8,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
+const val SECONDS_IN_DAY = 86_400L
+
 fun Application.configureAirQualityRecordPublicAPI() {
     val airQualityService by inject<AirQualityService>()
 
@@ -70,10 +72,12 @@ fun Application.configureAirQualityRecordPublicAPI() {
                 get("/latest") {
                     // Optional parameter to get latest records at given timestamp (to get historical data)
                     val at = call.parameters["at"]?.toLong()
+                    // Optional paramater to set max age for records, one day by default
+                    val maxAge = call.parameters["maxAge"]?.toLong() ?: SECONDS_IN_DAY
 
                     call.respond(
                         HttpStatusCode.OK,
-                        airQualityService.readLatestSubmittedRecordsWithDistinctLocations(at)
+                        airQualityService.readLatestSubmittedRecordsWithDistinctLocations(at, maxAge)
                     )
                 }
 
