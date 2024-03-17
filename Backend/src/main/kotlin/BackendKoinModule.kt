@@ -31,6 +31,7 @@ val BackendKoinModule = module {
     }
 
     single { ScraperService(database = get()) }
+    single { WebhookService(database = get()) }
     single { AirQualityService(database = get(), pageSize = pageSize) }
     single { RadiationService(database = get(), pageSize = pageSize) }
 }

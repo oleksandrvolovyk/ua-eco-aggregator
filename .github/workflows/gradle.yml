@@ -48,6 +48,9 @@ jobs:
     - name: Build Admin API JAR
       run: ./gradlew :AdminAPI:buildFatJar
 
+    - name: Build Webhook API JAR
+      run: ./gradlew :WebhookAPI:buildFatJar
+
     - name: Create a remote release
       id: create_release
       uses: actions/create-release@v1
@@ -139,6 +142,16 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: AdminAPI/build/libs/AdminAPI-all.jar
         asset_name: AdminAPI.jar
+        asset_content_type: application/zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    - name: Upload WebhookAPI JAR
+      uses: actions/upload-release-asset@v1.0.1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: WebhookAPI/build/libs/WebhookAPI-all.jar
+        asset_name: WebhookAPI.jar
         asset_content_type: application/zip
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

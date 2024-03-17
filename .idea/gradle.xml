@@ -20,6 +20,7 @@
             <option value="$PROJECT_DIR$/SaveDniproScraper" />
             <option value="$PROJECT_DIR$/ScraperAPI" />
             <option value="$PROJECT_DIR$/SensorCommunityScraper" />
+            <option value="$PROJECT_DIR$/WebhookAPI" />
           </set>
         </option>
       </GradleProjectSettings>
