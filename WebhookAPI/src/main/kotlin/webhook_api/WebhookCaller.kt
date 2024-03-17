@@ -7,10 +7,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.koin.java.KoinJavaComponent.inject
 
 const val DELAY_BETWEEN_DB_CHECKS_MILLIS = 300_000L // 5 minutes
@@ -29,24 +26,27 @@ class WebhookCaller {
 
     init {
         coroutineScope.launch {
-            val pendingWebhookCalls = webhookService.getPendingWebhookCalls()
-
-            pendingWebhookCalls.forEach { pendingWebhookCall ->
-                try {
-                    ktorClient.post(pendingWebhookCall.callbackUrl) {
-                        contentType(ContentType.Application.Json)
-                        setBody(pendingWebhookCall.data)
+            while (coroutineScope.isActive) {
+                println("Checking pending webhook calls.")
+                val pendingWebhookCalls = webhookService.getPendingWebhookCalls()
+                println("Sending ${pendingWebhookCalls.size} webhook calls ")
+                pendingWebhookCalls.forEach { pendingWebhookCall ->
+                    try {
+                        ktorClient.post(pendingWebhookCall.callbackUrl) {
+                            contentType(ContentType.Application.Json)
+                            setBody(pendingWebhookCall.data)
+                        }
+                    } catch (_: Throwable) {
                     }
-                } catch (_: Throwable) { }
 
-                // TODO: Remove webhook if response is invalid
+                    // TODO: Remove webhook if response is invalid
 
-                webhookService.removePendingWebhookCall(pendingWebhookCall.id)
+                    webhookService.removePendingWebhookCall(pendingWebhookCall.id)
 
-                delay(DELAY_BETWEEN_CALLS_MILLIS)
+                    delay(DELAY_BETWEEN_CALLS_MILLIS)
+                }
+                delay(DELAY_BETWEEN_DB_CHECKS_MILLIS)
             }
-
-            delay(DELAY_BETWEEN_DB_CHECKS_MILLIS)
         }
     }
 }
