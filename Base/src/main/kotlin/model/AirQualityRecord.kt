@@ -4,17 +4,17 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AirQualityRecord(
-    val id: Int,
-    val latitude: Double,
-    val longitude: Double,
-    val timestamp: Long,
+    override val id: Int,
+    override val latitude: Double,
+    override val longitude: Double,
+    override val timestamp: Long,
     val pm10: Float? = null,
     val pm25: Float,
     val pm100: Float,
-    val providerId: Int,
-    val metadata: String,
-    val createdAt: Long
-)
+    override val providerId: Int,
+    override val metadata: String,
+    override val createdAt: Long
+): AggregatedRecord
 
 @Serializable
 data class AirQualityRecordDTO(

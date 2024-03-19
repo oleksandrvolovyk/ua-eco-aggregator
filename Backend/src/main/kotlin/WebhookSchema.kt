@@ -1,4 +1,5 @@
 import kotlinx.coroutines.Dispatchers
+import model.AggregatedRecord
 import model.PendingWebhookCall
 import model.WebhookDTO
 import org.jetbrains.exposed.exceptions.ExposedSQLException
@@ -65,7 +66,7 @@ class WebhookService(database: Database) {
         } != 0
     }
 
-    suspend fun getPendingWebhookCalls(): List<PendingWebhookCall<Any>> = dbQuery {
+    suspend fun getPendingWebhookCalls(): List<PendingWebhookCall<AggregatedRecord>> = dbQuery {
         PendingWebhookCalls.selectAll().mapNotNull { it.toPendingWebhookCall() }
     }
 
@@ -73,7 +74,12 @@ class WebhookService(database: Database) {
         PendingWebhookCalls.deleteWhere { id eq callId }
     }
 
-    private suspend fun ResultRow.toPendingWebhookCall(): PendingWebhookCall<Any>? {
+    suspend fun deleteWebhooksByCallbackUrl(invalidCallbackUrl: String) = dbQuery {
+        // Delete all webhooks with this callbackUrl
+        Webhooks.deleteWhere { callbackUrl eq invalidCallbackUrl }
+    }
+
+    private suspend fun ResultRow.toPendingWebhookCall(): PendingWebhookCall<AggregatedRecord>? {
         return if (this[PendingWebhookCalls.airQualityRecordId] != null) {
             val airQualityRecord = this[PendingWebhookCalls.airQualityRecordId]?.let { airQualityService.read(it) }
             if (airQualityRecord != null) {

@@ -3,7 +3,7 @@ package model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PaginatedData<T>(
+data class PaginatedData<T: AggregatedRecord>(
     val page: Long,
     val maxPageNumber: Long,
     val itemsPerPage: Int,
