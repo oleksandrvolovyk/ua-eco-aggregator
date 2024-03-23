@@ -9,6 +9,9 @@ import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
     install(StatusPages) {
+        exception<IllegalArgumentException> { call, cause ->
+            call.respondText(text = "400: $cause" , status = HttpStatusCode.BadRequest)
+        }
         exception<Throwable> { call, cause ->
             call.respondText(text = "500: $cause" , status = HttpStatusCode.InternalServerError)
         }
