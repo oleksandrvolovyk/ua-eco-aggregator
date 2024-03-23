@@ -34,7 +34,12 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages-jvm")
     implementation("io.ktor:ktor-server-netty-jvm")
     implementation("ch.qos.logback:logback-classic:$logback_version")
-    implementation("io.ktor:ktor-server-double-receive-jvm:$ktor_version")
+
+    // CORS
+    implementation("io.ktor:ktor-server-cors:$ktor_version")
+
+    // Swagger UI
+    implementation("io.ktor:ktor-server-swagger:$ktor_version")
 
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")

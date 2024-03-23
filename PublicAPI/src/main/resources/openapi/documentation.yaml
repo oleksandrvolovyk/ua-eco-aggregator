@@ -1,0 +1,431 @@
+openapi: "3.0.3"
+info:
+  title: "UaEcoAggregator Public API"
+  description: "UaEcoAggregator Public API"
+  version: "1.0.0"
+servers:
+  - url: "http://152.70.169.253:8080"
+  - url: "http://127.0.0.1:8080"
+paths:
+  /api/air-quality-records:
+    get:
+      description: "Отримати записи про якість повітря з використанням вказаних фільтрів"
+      parameters:
+        - name: "providerId"
+          description: "Фільтрувати записи за ідентифікатором постачальника даних"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+        - name: "timestampStart"
+          description: "Фільтрувати записи з timestamp більше або рівно вказаного значення. Обов'язково вказувати timestampEnd"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "timestampEnd"
+          description: "Фільтрувати записи з міткою часу менше або рівно вказаного значення. Обов'язково вказувати timestampStart"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "latitude"
+          description: "Фільтрувати записи за локацією. Обов'язково вказувати longitude"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "longitude"
+          description: "Фільтрувати записи за локацією. Обов'язково вказувати latitude"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "sortField"
+          description: "Поле, за яким виконувати сортування результатів (timestamp, pm25 або pm100). За замовчуванням - timestamp"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            default: "timestamp"
+        - name: "sortDirection"
+          description: "Напрям сортування (ascending або descending). За замовчуванням - ascending"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            default: "ascending"
+        - name: "page"
+          description: "Номер сторінки"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PaginatedData_AirQualityRecord"
+  /api/air-quality-records/{id}:
+    get:
+      description: "Отримати запис про якість повітря по ідентифікатору"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AirQualityRecord"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/air-quality-records/latest:
+    get:
+      description: "Отримати останні записи про якість повітря з усіх локацій, які були створені менш ніж maxAge секунд тому"
+      parameters:
+        - name: "at"
+          description: "Timestamp (в секундах), за яким необхідно отримати останні записи. Якщо не вказано, використовується поточний час."
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "maxAge"
+          description: "Максимальний вік запису в секундах. За замовчуванням використовується 86400 секунд (24 години)."
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+            default: 86400
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/AirQualityRecord"
+  /api/radiation-records:
+    get:
+      description: "Отримати записи про радіаційний фон з використанням вказаних фільтрів"
+      parameters:
+        - name: "providerId"
+          description: "Фільтрувати записи за ідентифікатором постачальника даних"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+        - name: "timestampStart"
+          description: "Фільтрувати записи з timestamp більше або рівно вказаного значення. Обов'язково вказувати timestampEnd"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "timestampEnd"
+          description: "Фільтрувати записи з міткою часу менше або рівно вказаного значення. Обов'язково вказувати timestampStart"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "latitude"
+          description: "Фільтрувати записи за локацією. Обов'язково вказувати longitude"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "longitude"
+          description: "Фільтрувати записи за локацією. Обов'язково вказувати latitude"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "sortField"
+          description: "Поле, за яким виконувати сортування результатів (timestamp або dose). За замовчуванням - timestamp"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+        - name: "sortDirection"
+          description: "Напрям сортування (ascending або descending). За замовчуванням - ascending"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+        - name: "page"
+          description: "Номер сторінки"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PaginatedData_RadiationRecord"
+  /api/radiation-records/{id}:
+    get:
+      description: "Отримати запис про радіаційний фон по ідентифікатору"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/RadiationRecord"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/radiation-records/latest:
+    get:
+      description: "Отримати останні записи про радіаційний фон з усіх локацій, які були створені менш ніж maxAge секунд тому"
+      parameters:
+        - name: "at"
+          description: "Timestamp (в секундах), за яким необхідно отримати останні записи. Якщо не вказано, використовується поточний час."
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "maxAge"
+          description: "Максимальний вік запису в секундах. За замовчуванням використовується 86400 секунд (24 години)."
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+            default: 86400
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/RadiationRecord"
+  /api/scrapers:
+    get:
+      description: "Отримати всіх Scraper-ів"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PublicScraper"
+  /api/scrapers/{id}:
+    get:
+      description: "Отримати Scraper по ідентифікатору"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PublicScraper"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+components:
+  schemas:
+    AirQualityRecord:
+      description: "Запис про якість повітря."
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+          description: "Унікальний ідентифікатор запису."
+        latitude:
+          type: "number"
+          format: "double"
+          description: "Широта місця, де були зібрані дані про якість повітря."
+        longitude:
+          type: "number"
+          format: "double"
+          description: "Довгота місця, де були зібрані дані про якість повітря."
+        timestamp:
+          type: "integer"
+          format: "int64"
+          description: "Timestamp (в секундах), коли дані було зібрано."
+        pm10:
+          type: "number"
+          format: "float"
+          description: "Рівень часток PM1.0 у повітрі."
+        pm25:
+          type: "number"
+          format: "float"
+          description: "Рівень часток PM2.5 у повітрі."
+        pm100:
+          type: "number"
+          format: "float"
+          description: "Рівень часток PM10.0 у повітрі."
+        providerId:
+          type: "integer"
+          format: "int32"
+          description: "Ідентифікатор постачальника даних."
+        metadata:
+          type: "string"
+          description: "Метадані запису про якість повітря."
+        createdAt:
+          type: "integer"
+          format: "int64"
+          description: "Мітка часу створення запису (у мілісекундах)."
+    PaginatedData:
+      description: "Пагіновані дані."
+      type: "object"
+      properties:
+        page:
+          description: "Номер сторінки."
+          type: "integer"
+          format: "int64"
+        maxPageNumber:
+          description: "Максимальний номер сторінки."
+          type: "integer"
+          format: "int64"
+        itemsPerPage:
+          description: "Кількість записів у сторінці."
+          type: "integer"
+          format: "int32"
+        totalItemsCount:
+          description: "Загальна кількість записів."
+          type: "integer"
+          format: "int64"
+        data:
+          description: "Дані."
+          type: "array"
+    PaginatedData_AirQualityRecord:
+      description: "Пагіновані дані."
+      type: "object"
+      properties:
+        page:
+          description: "Номер сторінки."
+          type: "integer"
+          format: "int64"
+        maxPageNumber:
+          description: "Максимальний номер сторінки."
+          type: "integer"
+          format: "int64"
+        itemsPerPage:
+          description: "Кількість записів у сторінці."
+          type: "integer"
+          format: "int32"
+        totalItemsCount:
+          description: "Загальна кількість записів."
+          type: "integer"
+          format: "int64"
+        data:
+          description: "Дані."
+          type: "array"
+          items:
+            $ref: "#/components/schemas/AirQualityRecord"
+    RadiationRecord:
+      description: "Запис про радіаційний рівень."
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+          description: "Унікальний ідентифікатор запису."
+        latitude:
+          type: "number"
+          format: "double"
+          description: "Широта місця, де були зібрані дані про радіаційний рівень."
+        longitude:
+          type: "number"
+          format: "double"
+          description: "Довгота місця, де були зібрані дані про радіаційний рівень."
+        timestamp:
+          type: "integer"
+          format: "int64"
+          description: "Timestamp (в секундах), коли дані було зібрано."
+        doseInNanoSievert:
+          type: "integer"
+          format: "int32"
+          description: "Доза в наноЗівертах."
+        providerId:
+          type: "integer"
+          format: "int32"
+          description: "Ідентифікатор постачальника даних."
+        metadata:
+          type: "string"
+          description: "Метадані запису про радіаційний рівень."
+        createdAt:
+          type: "integer"
+          format: "int64"
+          description: "Мітка часу створення запису (у мілісекундах)."
+    PaginatedData_RadiationRecord:
+      description: "Пагіновані дані."
+      type: "object"
+      properties:
+        page:
+          description: "Номер сторінки."
+          type: "integer"
+          format: "int64"
+        maxPageNumber:
+          description: "Максимальний номер сторінки."
+          type: "integer"
+          format: "int64"
+        itemsPerPage:
+          description: "Кількість записів у сторінці."
+          type: "integer"
+          format: "int32"
+        totalItemsCount:
+          description: "Загальна кількість записів."
+          type: "integer"
+          format: "int64"
+        data:
+          description: "Дані."
+          type: "array"
+          items:
+            $ref: "#/components/schemas/RadiationRecord"
+    PublicScraper:
+      description: "Scraper."
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+          description: "Унікальний ідентифікатор Scraper-а."
+        name:
+          type: "string"
+          description: "Назва Scraper-а."
+        totalSubmittedAirQualityRecords:
+          type: "integer"
+          format: "int64"
+          description: "Загальна кількість надісланих записів про якість повітря."
+        totalSubmittedRadiationRecords:
+          type: "integer"
+          format: "int64"
+          description: "Загальна кількість надісланих записів про радіаційний рівень."

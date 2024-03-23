@@ -11,6 +11,8 @@ fun Application.module() {
     configureKoin()
     configureSerialization()
     configureRouting()
+    configureSwaggerUI()
+    configureCORS()
 
     configureAirQualityRecordPublicAPI()
     configureRadiationRecordPublicAPI()
