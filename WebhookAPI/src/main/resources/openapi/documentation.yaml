@@ -1,0 +1,124 @@
+openapi: "3.0.3"
+info:
+  title: "UaEcoAggregator Webhook API"
+  description: "UaEcoAggregator Webhook API"
+  version: "1.0.0"
+servers:
+  - url: "http://152.70.169.253:8080"
+  - url: "http://127.0.0.1:8080"
+paths:
+  /subscribe:
+    post:
+      description: "Підписка на отримання записів через вебхук."
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: "#/components/schemas/WebhookDTO"
+        required: true
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Failed to add webhook!"
+                Example#2:
+                  value: "Callback URL is invalid!"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Webhook added!"
+  /test:
+    get:
+      description: "Перевірка валідності callback URL."
+      parameters:
+      - name: "url"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "500":
+          description: "Internal Server Error"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Callback URL is valid!"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Callback URL is invalid!"
+  /unsubscribe:
+    post:
+      description: "Відписка від отримання сповіщень через вебхук."
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: "#/components/schemas/WebhookDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Webhook removed!"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Failed to remove webhook!"
+components:
+  schemas:
+    WebhookDTO:
+      type: "object"
+      properties:
+        latitude:
+          description: "Широта."
+          type: "number"
+          format: "double"
+        longitude:
+          description: "Довгота."
+          type: "number"
+          format: "double"
+        callbackUrl:
+          description: "Callback URL"
+          type: "string"
+      required:
+      - "latitude"
+      - "longitude"
+      - "callbackUrl"

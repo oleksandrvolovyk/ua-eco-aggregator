@@ -24,6 +24,12 @@ dependencies {
     implementation("io.insert-koin:koin-ktor:$koin_version")
     implementation("io.insert-koin:koin-logger-slf4j:$koin_version")
 
+    // CORS
+    implementation("io.ktor:ktor-server-cors:$ktor_version")
+
+    // Swagger UI
+    implementation("io.ktor:ktor-server-swagger:$ktor_version")
+
     // Ktor client
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
