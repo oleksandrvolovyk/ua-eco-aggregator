@@ -4,7 +4,7 @@ info:
   description: "UaEcoAggregator Webhook API"
   version: "1.0.0"
 servers:
-  - url: "http://152.70.169.253:8080"
+  - url: "http://138.2.154.33:8083"
   - url: "http://127.0.0.1:8080"
 paths:
   /subscribe:
