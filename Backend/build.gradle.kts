@@ -16,6 +16,7 @@ repositories {
 
 dependencies {
     implementation(project(":Base"))
+    implementation(kotlin("reflect"))
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 

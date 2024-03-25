@@ -1,17 +1,25 @@
 import kotlinx.coroutines.Dispatchers
 import model.AggregatedRecord
+import model.AggregatedRecordClasses
 import model.PendingWebhookCall
 import model.WebhookDTO
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.Table.Dual.nullable
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.java.KoinJavaComponent.inject
 
 class WebhookService(database: Database) {
-    private val airQualityService by inject<AirQualityService>(AirQualityService::class.java)
-    private val radiationService by inject<RadiationService>(RadiationService::class.java)
+
+    private val recordServices = mutableListOf<RecordService<*, *>>()
+
+    init {
+        for (record in AggregatedRecordClasses) {
+            recordServices.add(inject<RecordService<*, *>>(RecordService::class.java).value)
+        }
+    }
 
     object Webhooks : Table() {
         val id = integer("id").autoIncrement()
@@ -29,11 +37,19 @@ class WebhookService(database: Database) {
     object PendingWebhookCalls : Table() {
         val id = long("id").autoIncrement()
 
-        val airQualityRecordId = reference("air_quality_record_id", AirQualityService.AirQualityRecords.id).nullable()
-        val radiationRecordId = reference("radiation_record_id",  RadiationService.RadiationRecords.id).nullable()
         val callbackUrl = varchar("callback_url", 300)
 
         override val primaryKey = PrimaryKey(id)
+    }
+
+    private val referenceColumnsToRecordServicesMap = buildMap {
+        for (recordService in recordServices) {
+            val referenceColumn = PendingWebhookCalls
+                .reference("${recordService.recordsTableName}_id", recordService.recordsTableIdColumn)
+                .nullable()
+
+            this[referenceColumn] = recordService
+        }
     }
 
     init {
@@ -80,30 +96,18 @@ class WebhookService(database: Database) {
     }
 
     private suspend fun ResultRow.toPendingWebhookCall(): PendingWebhookCall<AggregatedRecord>? {
-        return if (this[PendingWebhookCalls.airQualityRecordId] != null) {
-            val airQualityRecord = this[PendingWebhookCalls.airQualityRecordId]?.let { airQualityService.read(it) }
-            if (airQualityRecord != null) {
-                PendingWebhookCall(
-                    id = this[PendingWebhookCalls.id],
-                    callbackUrl = this[PendingWebhookCalls.callbackUrl],
-                    data = airQualityRecord
-                )
-            } else {
-                null
+        for ((referenceColumn, recordService) in referenceColumnsToRecordServicesMap) {
+            if (this[referenceColumn] != null) {
+                val record = this[referenceColumn]?.let { recordService.read(it) }
+                if (record != null) {
+                    return PendingWebhookCall(
+                        id = this[PendingWebhookCalls.id],
+                        callbackUrl = this[PendingWebhookCalls.callbackUrl],
+                        data = record
+                    )
+                }
             }
-        } else if (this[PendingWebhookCalls.radiationRecordId] != null) {
-            val radiationRecord = this[PendingWebhookCalls.radiationRecordId]?.let { radiationService.read(it) }
-            if (radiationRecord != null) {
-                PendingWebhookCall(
-                    id = this[PendingWebhookCalls.id],
-                    callbackUrl = this[PendingWebhookCalls.callbackUrl],
-                    data = radiationRecord
-                )
-            } else {
-                null
-            }
-        } else {
-            null
         }
+        return null
     }
 }

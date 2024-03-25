@@ -17,4 +17,6 @@ fun Application.module() {
     configureAirQualityRecordPublicAPI()
     configureRadiationRecordPublicAPI()
     configureScraperPublicAPI()
+
+    configureTest()
 }

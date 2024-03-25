@@ -1,3 +1,4 @@
+import model.AggregatedRecordClasses
 import org.jetbrains.exposed.sql.Database
 import org.koin.dsl.module
 import kotlin.system.exitProcess
@@ -32,6 +33,14 @@ val BackendKoinModule = module {
 
     single { ScraperService(database = get()) }
     single { WebhookService(database = get()) }
-    single { AirQualityService(database = get(), pageSize = pageSize) }
-    single { RadiationService(database = get(), pageSize = pageSize) }
+    for (record in AggregatedRecordClasses) {
+        single {
+            RecordService(
+                entityClass = record.recordClass,
+                entityDTOClass = record.recordDTOClass,
+                database = get(),
+                pageSize = pageSize
+            )
+        }
+    }
 }

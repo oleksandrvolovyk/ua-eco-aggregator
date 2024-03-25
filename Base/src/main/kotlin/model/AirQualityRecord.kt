@@ -8,22 +8,22 @@ data class AirQualityRecord(
     override val latitude: Double,
     override val longitude: Double,
     override val timestamp: Long,
+    override val providerId: Int,
+    override val metadata: String,
+    override val createdAt: Long,
     val pm10: Float? = null,
     val pm25: Float,
     val pm100: Float,
-    override val providerId: Int,
-    override val metadata: String,
-    override val createdAt: Long
 ): AggregatedRecord
 
 @Serializable
 data class AirQualityRecordDTO(
-    val latitude: Double,
-    val longitude: Double,
-    val timestamp: Long,
+    override val latitude: Double,
+    override val longitude: Double,
+    override val timestamp: Long,
+    override val apiKey: String,
+    override val metadata: String,
     val pm10: Float? = null,
     val pm25: Float,
     val pm100: Float,
-    val apiKey: String,
-    val metadata: String
-)
+): AggregatedRecordDTO
