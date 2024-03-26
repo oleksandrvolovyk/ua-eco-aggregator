@@ -10,8 +10,7 @@ import org.koin.ktor.ext.inject
 
 fun Application.configureFrontend() {
     val scraperService by inject<ScraperService>()
-    //val airQualityService by inject<AirQualityService>()
-    //val radiationService by inject<RadiationService>()
+    val recordServices = injectRecordServices()
 
     routing {
         route("/scrapers") {
@@ -32,15 +31,15 @@ fun Application.configureFrontend() {
                     val data = mutableMapOf<String, Any>()
 
                     data["scraper"] = scraper
-//
-//                    data["totalSubmittedAirQualityRecords"] = airQualityService.getTotalSubmittedRecordsByProvider(id)
-//                    data["totalSubmittedRadiationRecords"] = radiationService.getTotalSubmittedRecordsByProvider(id)
-//
-//                    airQualityService.readLatestSubmittedRecordByProvider(id)
-//                        ?.let { data["latestSubmittedAirQualityRecord"] = it }
-//
-//                    radiationService.readLatestSubmittedRecordByProvider(id)
-//                        ?.let { data["latestSubmittedRadiationRecord"] = it }
+
+                    val totalSubmittedRecordsData = buildMap {
+                        for (recordService in recordServices) {
+                            this[recordService.recordsTableName] =
+                                recordService.getTotalSubmittedRecordsByProvider(scraper.id)
+                        }
+                    }
+
+                    data["totalSubmittedRecords"] = totalSubmittedRecordsData
 
                     call.respond(ThymeleafContent("scraper", data))
                 } else {
