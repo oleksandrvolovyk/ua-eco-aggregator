@@ -18,12 +18,12 @@ data class TestRecord(
 
 @Serializable
 data class TestRecordDTO(
-    override val latitude: Double,
-    override val longitude: Double,
-    override val timestamp: Long,
-    override val apiKey: String,
-    override val metadata: String,
-    val testData: Int,
+    override val latitude: Double = -1.0,
+    override val longitude: Double = -1.0,
+    override val timestamp: Long = -1,
+    override val apiKey: String = "",
+    override val metadata: String = "",
+    val testData: Int = -1,
     val testNullableData: Int? = null,
-    val testFloatData: Float
+    val testFloatData: Float = -1F
 ): AggregatedRecordDTO

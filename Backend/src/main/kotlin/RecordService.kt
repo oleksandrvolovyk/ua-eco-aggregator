@@ -33,7 +33,7 @@ private fun SortDirection.toSortOrder(): SortOrder =
 
 class RecordService<T : AggregatedRecord, TDTO : AggregatedRecordDTO>(
     private val entityClass: KClass<T>,
-    entityDTOClass: KClass<TDTO>,
+    val entityDTOClass: KClass<TDTO>,
     database: Database,
     private val pageSize: Int
 ) {
@@ -42,7 +42,7 @@ class RecordService<T : AggregatedRecord, TDTO : AggregatedRecordDTO>(
         val type: KType
     )
 
-    private val entityDataProperties =
+    val entityDataProperties =
         entityClass.primaryConstructor!!.parameters.mapIndexedNotNull { index, parameter ->
             if (index >= AggregatedRecord::class.memberProperties.size) {
                 EntityDataProperty(parameter.name!!, parameter.type)
@@ -97,9 +97,6 @@ class RecordService<T : AggregatedRecord, TDTO : AggregatedRecordDTO>(
     val recordsTableName = RecordsTable.nameInDatabaseCase()
     val recordsTableIdColumn = RecordsTable.id
 
-    private val fieldsIndex =
-        RecordsTable.realFields.toSet().mapIndexed { index, expression -> expression to index }.toMap()
-
     private fun Table.allFieldsAsString(tableName: String = this.tableName) =
         fields.joinToString(", ") { "$tableName.${(it as Column<*>).name}" }
 
@@ -132,6 +129,9 @@ class RecordService<T : AggregatedRecord, TDTO : AggregatedRecordDTO>(
             SchemaUtils.create(RecordsTable)
         }
     }
+
+    private val fieldsIndex = RecordsTable.realFields.toSet().mapIndexed { index, expression -> expression to index }
+        .toMap()
 
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }

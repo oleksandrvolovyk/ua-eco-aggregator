@@ -42,7 +42,6 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation-jvm")
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
-    implementation("org.postgresql:postgresql:$postgresql_version")
     implementation("io.ktor:ktor-server-swagger-jvm")
     implementation("io.ktor:ktor-server-host-common-jvm")
     implementation("io.ktor:ktor-server-status-pages-jvm")

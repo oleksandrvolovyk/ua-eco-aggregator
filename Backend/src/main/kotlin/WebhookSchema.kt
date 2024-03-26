@@ -9,6 +9,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.Table.Dual.nullable
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.koin.core.qualifier.named
 import org.koin.java.KoinJavaComponent.inject
 
 class WebhookService(database: Database) {
@@ -17,7 +18,12 @@ class WebhookService(database: Database) {
 
     init {
         for (record in AggregatedRecordClasses) {
-            recordServices.add(inject<RecordService<*, *>>(RecordService::class.java).value)
+            recordServices.add(
+                inject<RecordService<*, *>>(
+                    clazz = RecordService::class.java,
+                    qualifier = named(record.recordClass.simpleName!!)
+                ).value
+            )
         }
     }
 

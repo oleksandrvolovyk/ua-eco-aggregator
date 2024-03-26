@@ -1,7 +1,5 @@
 package public_api.plugins
 
-import AirQualityService
-import RadiationService
 import ScraperService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -15,36 +13,36 @@ import org.koin.ktor.ext.inject
 data class PublicScraper(
     val id: Int,
     val name: String,
-    val totalSubmittedAirQualityRecords: Long,
-    val totalSubmittedRadiationRecords: Long
+    val totalSubmittedRecords: List<Pair<String, Long>>
 )
 
-fun Scraper.toPublicScraper(
-    totalSubmittedAirQualityRecords: Long,
-    totalSubmittedRadiationRecords: Long
-): PublicScraper =
+fun Scraper.toPublicScraper(totalSubmittedRecords: List<Pair<String, Long>>): PublicScraper =
     PublicScraper(
         id = this.id,
         name = this.name,
-        totalSubmittedAirQualityRecords = totalSubmittedAirQualityRecords,
-        totalSubmittedRadiationRecords = totalSubmittedRadiationRecords
+        totalSubmittedRecords = totalSubmittedRecords
     )
 
 fun Application.configureScraperPublicAPI() {
     val scraperService by inject<ScraperService>()
-    val airQualityService by inject<AirQualityService>()
-    val radiationService by inject<RadiationService>()
+
+    val recordServices = injectRecordServices()
 
     routing {
         route("/api") {
             route("/scrapers") {
                 // Get all scrapers
                 get {
-                    val scrapers = scraperService.readAll().map {
-                        val totalSubmittedAirQualityRecords = airQualityService.getTotalSubmittedRecordsByProvider(it.id)
-                        val totalSubmittedRadiationRecords = radiationService.getTotalSubmittedRecordsByProvider(it.id)
+                    val scrapers = scraperService.readAll().map { scraper ->
+                        val totalSubmittedRecords = buildList<Pair<String, Long>> {
+                            for (recordService in recordServices) {
+                                recordService.entityClassSimpleName to recordService.getTotalSubmittedRecordsByProvider(
+                                    scraper.id
+                                )
+                            }
+                        }
 
-                        it.toPublicScraper(totalSubmittedAirQualityRecords, totalSubmittedRadiationRecords)
+                        scraper.toPublicScraper(totalSubmittedRecords)
                     }
                     call.respond(HttpStatusCode.OK, scrapers)
                 }
@@ -54,15 +52,15 @@ fun Application.configureScraperPublicAPI() {
                     val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
                     val scraper = scraperService.read(id)
                     if (scraper != null) {
+                        val totalSubmittedRecords = buildList<Pair<String, Long>> {
+                            for (recordService in recordServices) {
+                                recordService.entityClassSimpleName to recordService.getTotalSubmittedRecordsByProvider(
+                                    scraper.id
+                                )
+                            }
+                        }
 
-                        val totalSubmittedAirQualityRecords = airQualityService.getTotalSubmittedRecordsByProvider(id)
-                        val totalSubmittedRadiationRecords = radiationService.getTotalSubmittedRecordsByProvider(id)
-
-                        val publicScraper = scraper.toPublicScraper(
-                            totalSubmittedAirQualityRecords, totalSubmittedRadiationRecords
-                        )
-
-                        call.respond(HttpStatusCode.OK, publicScraper)
+                        call.respond(HttpStatusCode.OK, scraper.toPublicScraper(totalSubmittedRecords))
                     } else {
                         call.respond(HttpStatusCode.NotFound)
                     }

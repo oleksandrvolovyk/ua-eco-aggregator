@@ -14,9 +14,6 @@ fun Application.module() {
     configureSwaggerUI()
     configureCORS()
 
-    configureAirQualityRecordPublicAPI()
-    configureRadiationRecordPublicAPI()
+    configureRecordPublicAPI()
     configureScraperPublicAPI()
-
-    configureTest()
 }

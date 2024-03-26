@@ -14,6 +14,5 @@ fun Application.module() {
     configureSwaggerUI()
     configureCORS()
 
-    WebhookCaller()
     configureWebhookAPI()
 }

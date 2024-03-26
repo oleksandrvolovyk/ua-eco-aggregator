@@ -18,12 +18,12 @@ data class AirQualityRecord(
 
 @Serializable
 data class AirQualityRecordDTO(
-    override val latitude: Double,
-    override val longitude: Double,
-    override val timestamp: Long,
-    override val apiKey: String,
-    override val metadata: String,
+    override val latitude: Double = -1.0,
+    override val longitude: Double = -1.0,
+    override val timestamp: Long = -1,
+    override val apiKey: String = "",
+    override val metadata: String = "",
     val pm10: Float? = null,
-    val pm25: Float,
-    val pm100: Float,
+    val pm25: Float = -1F,
+    val pm100: Float = -1F,
 ): AggregatedRecordDTO

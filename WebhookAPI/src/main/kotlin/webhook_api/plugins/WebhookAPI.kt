@@ -12,11 +12,13 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import model.WebhookDTO
 import org.koin.ktor.ext.inject
+import webhook_api.WebhookCaller
 
 const val CALLBACK_URL_VALID_RESPONSE = "UaEcoAggregator"
 
 fun Application.configureWebhookAPI() {
     val webhookService by inject<WebhookService>()
+    val webhookCaller = WebhookCaller(webhookService)
 
     val ktorClient = HttpClient(CIO)
 

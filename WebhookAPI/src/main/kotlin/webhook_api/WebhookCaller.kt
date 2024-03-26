@@ -12,16 +12,13 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.errors.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.SerializationException
-import org.koin.java.KoinJavaComponent.inject
 import webhook_api.plugins.CALLBACK_URL_VALID_RESPONSE
 
 const val DELAY_BETWEEN_DB_CHECKS_MILLIS = 300_000L // 5 minutes
 const val DELAY_BETWEEN_CALLS_MILLIS = 1_000L // 1 second
 const val DELAY_BETWEEN_FAILED_DB_CALLS = 5_000L // 5 seconds
 
-class WebhookCaller {
-    private val webhookService by inject<WebhookService>(WebhookService::class.java)
-
+class WebhookCaller(webhookService: WebhookService) {
     private val coroutineScope = CoroutineScope(Job())
 
     private val ktorClient = HttpClient(CIO) {
