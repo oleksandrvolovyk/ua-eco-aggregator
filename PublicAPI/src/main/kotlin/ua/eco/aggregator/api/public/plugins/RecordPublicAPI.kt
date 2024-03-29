@@ -1,17 +1,24 @@
 package ua.eco.aggregator.api.public.plugins
 
-import ua.eco.aggregator.backend.SortDirection
-import ua.eco.aggregator.backend.SortFieldName
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import ua.eco.aggregator.backend.SortDirection
+import ua.eco.aggregator.backend.SortFieldName
 import ua.eco.aggregator.base.model.AggregatedRecordClasses
 
 const val SECONDS_IN_DAY = 86_400L
+const val MAX_CACHE_AGE_MILLIS = 300_000L // 5 minutes
 
 fun Application.configureRecordPublicAPI() {
     val recordServices = injectRecordServices()
+
+    val cachedLatestRecords = recordServices.associate {
+        it.entityClassSimpleName!! to cached(MAX_CACHE_AGE_MILLIS) {
+            it.readLatestSubmittedRecordsWithDistinctLocations(at = null, maxAge = SECONDS_IN_DAY)
+        }
+    }
 
     routing {
         route("/api") {
@@ -73,12 +80,15 @@ fun Application.configureRecordPublicAPI() {
                         // Optional paramater to set max age for records, one day by default
                         val maxAge = call.parameters["maxAge"]?.toLong() ?: SECONDS_IN_DAY
 
-                        call.respond(
-                            HttpStatusCode.OK,
+                        val records = if (at == null && maxAge == SECONDS_IN_DAY) {
+                           cachedLatestRecords[recordType.recordClass.simpleName!!]!!.getValue()
+                        } else {
                             recordServices
                                 .first { it.entityClassSimpleName == recordType.recordClass.simpleName }
                                 .readLatestSubmittedRecordsWithDistinctLocations(at, maxAge)
-                        )
+                        }
+
+                        call.respond(HttpStatusCode.OK, records)
                     }
 
                     get("/{id}") {
