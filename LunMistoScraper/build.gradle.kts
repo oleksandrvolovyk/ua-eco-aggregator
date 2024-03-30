@@ -33,5 +33,5 @@ kotlin {
 }
 
 application {
-    mainClass.set("MainKt")
+    mainClass.set("ua.eco.aggregator.scraper.lun_misto.MainKt")
 }

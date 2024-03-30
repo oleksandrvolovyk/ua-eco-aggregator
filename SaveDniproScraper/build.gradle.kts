@@ -34,5 +34,5 @@ kotlin {
 }
 
 application {
-    mainClass.set("MainKt")
+    mainClass.set("ua.eco.aggregator.scraper.save_dnipro.MainKt")
 }

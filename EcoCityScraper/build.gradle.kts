@@ -32,5 +32,5 @@ kotlin {
 }
 
 application {
-    mainClass.set("MainKt")
+    mainClass.set("ua.eco.aggregator.scraper.eco_city.MainKt")
 }
