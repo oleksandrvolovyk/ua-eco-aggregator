@@ -32,5 +32,6 @@ class AggregatedRecordData<T : AggregatedRecord, TDTO : AggregatedRecordDTO>(
 val AggregatedRecordClasses = listOf(
     AggregatedRecordData(AirQualityRecord::class, AirQualityRecordDTO::class, "air-quality-records"),
     AggregatedRecordData(RadiationRecord::class, RadiationRecordDTO::class, "radiation-records"),
-    AggregatedRecordData(TestRecord::class, TestRecordDTO::class, "test-records")
+    AggregatedRecordData(TestRecord::class, TestRecordDTO::class, "test-records"),
+    AggregatedRecordData(FireRecord::class, FireRecordDTO::class, "fire-records")
 )

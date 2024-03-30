@@ -39,6 +39,9 @@ jobs:
     - name: Build EcoZagrozaGovUaScraper app JAR
       run: ./gradlew :EcoZagrozaGovUaScraper:buildFatJar
 
+    - name: Build NasaFirmsScraper app JAR
+      run: ./gradlew :NasaFirmsScraper:buildFatJar
+
     - name: Build Public API JAR
       run: ./gradlew :PublicAPI:buildFatJar
 
@@ -112,6 +115,16 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: EcoZagrozaGovUaScraper/build/libs/EcoZagrozaGovUaScraper-all.jar
         asset_name: EcoZagrozaGovUaScraper.jar
+        asset_content_type: application/zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    - name: Upload NasaFirmsScraper JAR
+      uses: actions/upload-release-asset@v1.0.1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: NasaFirmsScraper/build/libs/NasaFirmsScraper-all.jar
+        asset_name: NasaFirmsScraper.jar
         asset_content_type: application/zip
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

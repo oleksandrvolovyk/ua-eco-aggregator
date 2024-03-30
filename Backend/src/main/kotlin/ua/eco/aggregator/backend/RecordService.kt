@@ -105,6 +105,9 @@ class RecordService<T : AggregatedRecord, TDTO : AggregatedRecordDTO>(
     init {
         transaction(database) {
             for (property in entityDataProperties) {
+                if (entityDataColumns.flatten().any { it.name == property.name }) {
+                    continue
+                }
                 when (property.type) {
                     typeOf<Int>() -> entityIntDataColumns.add(RecordsTable.integer(property.name))
                     typeOf<Int?>() -> entityNullableIntDataColumns.add(RecordsTable.integer(property.name).nullable())
