@@ -1,9 +1,6 @@
 package ua.eco.aggregator.backend
 
 import kotlinx.coroutines.Dispatchers
-import ua.eco.aggregator.base.model.AggregatedRecord
-import ua.eco.aggregator.base.model.AggregatedRecordDTO
-import ua.eco.aggregator.base.model.PaginatedData
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -13,6 +10,9 @@ import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.java.KoinJavaComponent.inject
+import ua.eco.aggregator.base.model.AggregatedRecord
+import ua.eco.aggregator.base.model.AggregatedRecordDTO
+import ua.eco.aggregator.base.model.PaginatedData
 import java.time.Instant
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -141,15 +141,15 @@ class RecordService<T : AggregatedRecord, TDTO : AggregatedRecordDTO>(
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
 
-    private suspend fun create(entityDTO: TDTO): Boolean {
-        val scraper = scraperService.getByApiKey(entityDTO.apiKey)!!
+    private suspend fun create(entityDTO: TDTO, scraperId: Int? = null): Boolean {
+        val scraperId = scraperId ?: scraperService.getByApiKey(entityDTO.apiKey)!!.id
 
         return try {
             RecordsTable.insert { table ->
                 table[latitude] = entityDTO.latitude
                 table[longitude] = entityDTO.longitude
                 table[timestamp] = entityDTO.timestamp
-                table[provider] = scraper.id
+                table[provider] = scraperId
                 table[metadata] = entityDTO.metadata
                 table[createdAt] = Instant.now().epochSecond
 
@@ -172,8 +172,14 @@ class RecordService<T : AggregatedRecord, TDTO : AggregatedRecordDTO>(
     suspend fun createMany(entityDTOs: List<TDTO>): Int = dbQuery {
         var addedCounter = 0
 
+        val allApiKeysEqual = entityDTOs.all { it.apiKey == entityDTOs.first().apiKey }
+
+        val scraperId = if (allApiKeysEqual) {
+            scraperService.getByApiKey(entityDTOs.first().apiKey)!!.id
+        } else null
+
         entityDTOs.forEach { entityDTO ->
-            if (create(entityDTO)) {
+            if (create(entityDTO, scraperId)) {
                 addedCounter++
             }
         }
