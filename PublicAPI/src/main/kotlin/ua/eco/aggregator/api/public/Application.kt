@@ -13,6 +13,7 @@ fun Application.module() {
     configureRouting()
     configureSwaggerUI()
     configureCORS()
+    configureCachingHeaders()
 
     configureRecordPublicAPI()
     configureScraperPublicAPI()
