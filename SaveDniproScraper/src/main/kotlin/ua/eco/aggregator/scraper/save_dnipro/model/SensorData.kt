@@ -12,6 +12,18 @@ data class SensorData(
     val platformName: String
 )
 
+fun SensorData.timezoneAsSeconds(): Int {
+    val sign = timezone[0]
+    val timezoneHours = timezone.substring(1, 3).toInt()
+    val timezoneMinutes = timezone.substring(3, 5).toInt()
+
+    return when (sign) {
+        '+' -> timezoneHours * 3600 + timezoneMinutes * 60
+        '-' -> -(timezoneHours * 3600 + timezoneMinutes * 60)
+        else -> throw IllegalStateException("Sign(+,-) must be the first symbol in timezone!")
+    }
+}
+
 data class Pollutant(
     val pol: String,
     val unit: String,

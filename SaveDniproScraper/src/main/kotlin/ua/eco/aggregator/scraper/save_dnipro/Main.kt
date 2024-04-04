@@ -14,6 +14,7 @@ import kotlinx.coroutines.runBlocking
 import ua.eco.aggregator.base.model.AirQualityRecordDTO
 import ua.eco.aggregator.scraper.save_dnipro.model.Pollutant
 import ua.eco.aggregator.scraper.save_dnipro.model.SensorData
+import ua.eco.aggregator.scraper.save_dnipro.model.timezoneAsSeconds
 import java.text.SimpleDateFormat
 
 val SCRAPING_API_URL = System.getenv("SCRAPING_API_URL")
@@ -49,7 +50,8 @@ fun main() = runBlocking {
 
             if (pm25record != null && pm100record != null) {
                 val date = dateFormat.parse(pm25record.time)
-                val unixTimestamp = (date.time / 1000) - 7200 // Convert milliseconds to seconds and apply timezone
+                val unixTimestamp =
+                    (date.time / 1000) - sensorData.timezoneAsSeconds() // Convert milliseconds to seconds and apply timezone
 
                 val pm25 = pm25record.value
                 val pm100 = pm100record.value
@@ -67,6 +69,13 @@ fun main() = runBlocking {
                     )
                 )
             }
+        }
+
+        val currentTime = System.currentTimeMillis() / 1000
+        val recordsWithFutureTime = airQualityRecordDTOs.filter { it.timestamp > currentTime }
+
+        if (recordsWithFutureTime.isNotEmpty()) {
+            println("WARNING: ${recordsWithFutureTime.size} records with future timestamps received!")
         }
 
         println("Received ${airQualityRecordDTOs.size} records.")
