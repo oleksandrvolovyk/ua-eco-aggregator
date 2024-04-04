@@ -1,22 +1,22 @@
 package ua.eco.aggregator.api.public.plugins
 
-import ua.eco.aggregator.backend.ScraperService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
-import ua.eco.aggregator.base.model.Scraper
 import org.koin.ktor.ext.inject
+import ua.eco.aggregator.backend.ScraperService
+import ua.eco.aggregator.base.model.Scraper
 
 @Serializable
 data class PublicScraper(
     val id: Int,
     val name: String,
-    val totalSubmittedRecords: List<Pair<String, Long>>
+    val totalSubmittedRecords: Map<String, Long>
 )
 
-fun Scraper.toPublicScraper(totalSubmittedRecords: List<Pair<String, Long>>): PublicScraper =
+fun Scraper.toPublicScraper(totalSubmittedRecords: Map<String, Long>): PublicScraper =
     PublicScraper(
         id = this.id,
         name = this.name,
@@ -34,11 +34,10 @@ fun Application.configureScraperPublicAPI() {
                 // Get all scrapers
                 get {
                     val scrapers = scraperService.readAll().map { scraper ->
-                        val totalSubmittedRecords = buildList<Pair<String, Long>> {
+                        val totalSubmittedRecords = buildMap {
                             for (recordService in recordServices) {
-                                recordService.entityClassSimpleName to recordService.getTotalSubmittedRecordsByProvider(
-                                    scraper.id
-                                )
+                                this[recordService.recordsTableName] =
+                                    recordService.getTotalSubmittedRecordsByProvider(scraper.id)
                             }
                         }
 
@@ -52,11 +51,10 @@ fun Application.configureScraperPublicAPI() {
                     val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
                     val scraper = scraperService.read(id)
                     if (scraper != null) {
-                        val totalSubmittedRecords = buildList<Pair<String, Long>> {
+                        val totalSubmittedRecords = buildMap {
                             for (recordService in recordServices) {
-                                recordService.entityClassSimpleName to recordService.getTotalSubmittedRecordsByProvider(
-                                    scraper.id
-                                )
+                                this[recordService.recordsTableName] =
+                                    recordService.getTotalSubmittedRecordsByProvider(scraper.id)
                             }
                         }
 
