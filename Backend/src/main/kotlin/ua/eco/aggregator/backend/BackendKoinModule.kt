@@ -1,9 +1,11 @@
 package ua.eco.aggregator.backend
 
-import ua.eco.aggregator.base.model.AggregatedRecordClasses
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.sql.Database
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import ua.eco.aggregator.base.model.AggregatedRecordClasses
 import kotlin.system.exitProcess
 
 val BackendKoinModule = module {
@@ -20,12 +22,18 @@ val BackendKoinModule = module {
             exitProcess(1)
         }
 
-        Database.connect(
-            url = "jdbc:oracle:thin:@$connectionString",
-            user = username,
-            driver = "oracle.jdbc.OracleDriver",
-            password = password
-        )
+        val hikariDataSource = HikariDataSource(HikariConfig().apply {
+            driverClassName = "oracle.jdbc.OracleDriver"
+            jdbcUrl = "jdbc:oracle:thin:@$connectionString"
+            this.username = username
+            this.password = password
+            maximumPoolSize = 4
+            isAutoCommit = false
+            transactionIsolation = "TRANSACTION_READ_COMMITTED"
+            validate()
+        })
+
+        Database.connect(hikariDataSource)
     }
 
     val pageSize = try {
