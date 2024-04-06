@@ -14,7 +14,7 @@ data class TestRecord(
     val testData: Int,
     val testNullableData: Int? = null,
     val testFloatData: Float
-): AggregatedRecord
+) : AggregatedRecord, java.io.Serializable
 
 @Serializable
 data class TestRecordDTO(
@@ -26,4 +26,4 @@ data class TestRecordDTO(
     val testData: Int = -1,
     val testNullableData: Int? = null,
     val testFloatData: Float = -1F
-): AggregatedRecordDTO
+) : AggregatedRecordDTO

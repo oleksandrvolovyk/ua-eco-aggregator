@@ -1,14 +1,14 @@
 package ua.eco.aggregator.backend
 
 import kotlinx.coroutines.Dispatchers
-import ua.eco.aggregator.base.model.Scraper
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
+import ua.eco.aggregator.base.model.Scraper
 
-class ScraperService(database: Database) {
-    object Scrapers : Table() {
+class ScraperServiceImpl(database: Database) : ScraperService {
+    private object Scrapers : Table() {
         val id = integer("id").autoIncrement()
         val name = varchar("name", length = 50)
         val apiKey = char("api_key", length = 32)
@@ -22,41 +22,43 @@ class ScraperService(database: Database) {
         }
     }
 
+    override val scrapersTableIdColumn: Column<Int> = Scrapers.id
+
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
 
-    suspend fun create(scraperName: String, scraperApiKey: String): Int = dbQuery {
+    override suspend fun create(scraperName: String, scraperApiKey: String): Int = dbQuery {
         Scrapers.insert {
             it[name] = scraperName
             it[apiKey] = scraperApiKey
         }[Scrapers.id]
     }
 
-    suspend fun readAll(): List<Scraper> = dbQuery {
+    override suspend fun readAll(): List<Scraper> = dbQuery {
         Scrapers.selectAll()
             .map { Scraper(it[Scrapers.id], it[Scrapers.name], it[Scrapers.apiKey]) }
     }
 
-    suspend fun read(id: Int): Scraper? = dbQuery {
+    override suspend fun read(id: Int): Scraper? = dbQuery {
         Scrapers.select { Scrapers.id eq id }
             .map { Scraper(it[Scrapers.id], it[Scrapers.name], it[Scrapers.apiKey]) }
             .singleOrNull()
     }
 
-    suspend fun getByApiKey(apiKey: String): Scraper? = dbQuery {
+    override suspend fun getByApiKey(apiKey: String): Scraper? = dbQuery {
         Scrapers.select { Scrapers.apiKey eq apiKey }
             .map { Scraper(it[Scrapers.id], it[Scrapers.name], it[Scrapers.apiKey]) }
             .singleOrNull()
     }
 
-    suspend fun update(id: Int, scraperName: String, scraperApiKey: String) = dbQuery {
+    override suspend fun update(id: Int, scraperName: String, scraperApiKey: String) = dbQuery {
         Scrapers.update({ Scrapers.id eq id }) {
             it[name] = scraperName
             it[apiKey] = scraperApiKey
         }
     }
 
-    suspend fun delete(id: Int) = dbQuery {
+    override suspend fun delete(id: Int) = dbQuery {
         Scrapers.deleteWhere { Scrapers.id.eq(id) }
     }
 }

@@ -1,13 +1,13 @@
 package ua.eco.aggregator.api.admin.plugins
 
-import ua.eco.aggregator.backend.ScraperService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import ua.eco.aggregator.base.model.ScraperDTO
 import org.koin.ktor.ext.inject
+import ua.eco.aggregator.backend.ScraperService
+import ua.eco.aggregator.base.model.ScraperDTO
 
 fun Application.configureAPI() {
     val scraperService by inject<ScraperService>()

@@ -15,7 +15,7 @@ data class FireRecord(
     val track: Double,
     val confidence: Int?,
     val fireRadiativePower: Double
-): AggregatedRecord
+) : AggregatedRecord, java.io.Serializable
 
 @Serializable
 data class FireRecordDTO(
@@ -28,4 +28,4 @@ data class FireRecordDTO(
     val track: Double = -1.0,
     val confidence: Int? = null,
     val fireRadiativePower: Double = -1.0
-): AggregatedRecordDTO
+) : AggregatedRecordDTO

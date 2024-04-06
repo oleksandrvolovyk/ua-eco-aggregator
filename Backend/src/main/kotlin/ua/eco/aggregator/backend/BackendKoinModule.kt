@@ -5,7 +5,10 @@ import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.sql.Database
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import ua.eco.aggregator.base.model.AggregatedRecord
 import ua.eco.aggregator.base.model.AggregatedRecordClasses
+import ua.eco.aggregator.base.model.AggregatedRecordDTO
+import java.io.File
 import kotlin.system.exitProcess
 
 val BackendKoinModule = module {
@@ -42,14 +45,23 @@ val BackendKoinModule = module {
         50
     }
 
-    single { ScraperService(database = get()) }
+    single<ScraperService> {
+        ScraperServiceCachedImpl(
+            delegate = ScraperServiceImpl(database = get()),
+            storagePath = File("build/ehcache")
+        )
+    }
+
     for (record in AggregatedRecordClasses) {
-        single(named(record.recordClass.simpleName!!)) {
-            RecordService(
-                entityClass = record.recordClass,
-                entityDTOClass = record.recordDTOClass,
-                database = get(),
-                pageSize = pageSize
+        single<RecordService<out AggregatedRecord, out AggregatedRecordDTO>>(named(record.recordClass.simpleName!!)) {
+            RecordServiceCachedImpl(
+                delegate = RecordServiceImpl(
+                    entityClass = record.recordClass,
+                    entityDTOClass = record.recordDTOClass,
+                    database = get(),
+                    pageSize = pageSize
+                ),
+                storagePath = File("build/ehcache${record.recordClass.simpleName}")
             )
         }
     }

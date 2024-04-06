@@ -12,7 +12,7 @@ data class RadiationRecord(
     override val metadata: String,
     override val createdAt: Long,
     val doseInNanoSievert: Int,
-): AggregatedRecord
+) : AggregatedRecord, java.io.Serializable
 
 @Serializable
 data class RadiationRecordDTO(
@@ -22,4 +22,4 @@ data class RadiationRecordDTO(
     override val apiKey: String = "",
     override val metadata: String = "",
     val doseInNanoSievert: Int = -1,
-): AggregatedRecordDTO
+) : AggregatedRecordDTO

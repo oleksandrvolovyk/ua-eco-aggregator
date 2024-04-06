@@ -14,7 +14,7 @@ data class AirQualityRecord(
     val pm10: Float? = null,
     val pm25: Float,
     val pm100: Float,
-): AggregatedRecord
+) : AggregatedRecord, java.io.Serializable
 
 @Serializable
 data class AirQualityRecordDTO(
@@ -26,4 +26,4 @@ data class AirQualityRecordDTO(
     val pm10: Float? = null,
     val pm25: Float = -1F,
     val pm100: Float = -1F,
-): AggregatedRecordDTO
+) : AggregatedRecordDTO
