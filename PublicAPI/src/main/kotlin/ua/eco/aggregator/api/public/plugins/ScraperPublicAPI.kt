@@ -13,14 +13,20 @@ import ua.eco.aggregator.base.model.Scraper
 data class PublicScraper(
     val id: Int,
     val name: String,
-    val totalSubmittedRecords: Map<String, Long>
+    val totalSubmittedRecords: Map<String, Long>,
+    val descriptionEnglish: String,
+    val descriptionUkrainian: String,
+    val url: String
 )
 
 fun Scraper.toPublicScraper(totalSubmittedRecords: Map<String, Long>): PublicScraper =
     PublicScraper(
         id = this.id,
         name = this.name,
-        totalSubmittedRecords = totalSubmittedRecords
+        totalSubmittedRecords = totalSubmittedRecords,
+        descriptionEnglish = this.descriptionEnglish,
+        descriptionUkrainian = this.descriptionUkrainian,
+        url = this.url
     )
 
 fun Application.configureScraperPublicAPI() {

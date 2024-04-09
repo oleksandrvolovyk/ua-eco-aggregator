@@ -12,6 +12,9 @@ class ScraperServiceImpl(database: Database) : ScraperService {
         val id = integer("id").autoIncrement()
         val name = varchar("name", length = 50)
         val apiKey = char("api_key", length = 32)
+        val description_en = varchar("description_en", 500)
+        val description_uk = varchar("description_uk", 500)
+        val url = varchar("url", 200)
 
         override val primaryKey = PrimaryKey(id)
     }
@@ -35,19 +38,18 @@ class ScraperServiceImpl(database: Database) : ScraperService {
     }
 
     override suspend fun readAll(): List<Scraper> = dbQuery {
-        Scrapers.selectAll()
-            .map { Scraper(it[Scrapers.id], it[Scrapers.name], it[Scrapers.apiKey]) }
+        Scrapers.selectAll().map { it.toScraper() }
     }
 
     override suspend fun read(id: Int): Scraper? = dbQuery {
         Scrapers.select { Scrapers.id eq id }
-            .map { Scraper(it[Scrapers.id], it[Scrapers.name], it[Scrapers.apiKey]) }
+            .map { it.toScraper() }
             .singleOrNull()
     }
 
     override suspend fun getByApiKey(apiKey: String): Scraper? = dbQuery {
         Scrapers.select { Scrapers.apiKey eq apiKey }
-            .map { Scraper(it[Scrapers.id], it[Scrapers.name], it[Scrapers.apiKey]) }
+            .map { it.toScraper() }
             .singleOrNull()
     }
 
@@ -60,5 +62,16 @@ class ScraperServiceImpl(database: Database) : ScraperService {
 
     override suspend fun delete(id: Int) = dbQuery {
         Scrapers.deleteWhere { Scrapers.id.eq(id) }
+    }
+
+    private fun ResultRow.toScraper(): Scraper {
+        return Scraper(
+            id = this[Scrapers.id],
+            name = this[Scrapers.name],
+            apiKey = this[Scrapers.apiKey],
+            descriptionEnglish = this[Scrapers.description_en],
+            descriptionUkrainian = this[Scrapers.description_uk],
+            url = this[Scrapers.url]
+        )
     }
 }
