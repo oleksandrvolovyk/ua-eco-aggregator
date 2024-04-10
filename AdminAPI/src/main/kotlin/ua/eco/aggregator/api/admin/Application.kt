@@ -12,6 +12,7 @@ fun Application.module() {
     configureSerialization()
     configureThymeleaf()
     configureRouting()
+    configureAuth()
 
     configureAPI()
     configureFrontend()
