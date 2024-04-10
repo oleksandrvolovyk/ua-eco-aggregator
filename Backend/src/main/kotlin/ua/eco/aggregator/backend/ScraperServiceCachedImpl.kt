@@ -8,6 +8,8 @@ import org.ehcache.config.units.EntryUnit
 import org.ehcache.config.units.MemoryUnit
 import org.ehcache.impl.config.persistence.CacheManagerPersistenceConfiguration
 import ua.eco.aggregator.base.model.Scraper
+import ua.eco.aggregator.base.model.ScraperDTO
+import ua.eco.aggregator.base.model.toScraper
 import java.io.File
 
 class ScraperServiceCachedImpl(
@@ -39,10 +41,10 @@ class ScraperServiceCachedImpl(
             }
         }
 
-    override suspend fun create(scraperName: String, scraperApiKey: String): Int {
-        delegate.create(scraperName, scraperApiKey)
+    override suspend fun create(scraperDTO: ScraperDTO): Int {
+        delegate.create(scraperDTO)
             .also { scraperId ->
-                scraperCache.put(scraperId, Scraper(scraperId, scraperName, scraperApiKey))
+                scraperCache.put(scraperId, scraperDTO.toScraper(scraperId))
                 return scraperId
             }
     }
@@ -59,9 +61,9 @@ class ScraperServiceCachedImpl(
             ?: delegate.getByApiKey(apiKey)
                 ?.also { scraper -> scraperCache.put(scraper.id, scraper) }
 
-    override suspend fun update(id: Int, scraperName: String, scraperApiKey: String): Int {
-        scraperCache.put(id, Scraper(id, scraperName, scraperApiKey))
-        return delegate.update(id, scraperName, scraperApiKey)
+    override suspend fun update(id: Int, scraperDTO: ScraperDTO): Int {
+        scraperCache.put(id, scraperDTO.toScraper(id))
+        return delegate.update(id, scraperDTO)
     }
 
     override suspend fun delete(id: Int): Int {

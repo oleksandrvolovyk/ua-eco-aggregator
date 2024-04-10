@@ -6,6 +6,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import ua.eco.aggregator.base.model.Scraper
+import ua.eco.aggregator.base.model.ScraperDTO
 
 class ScraperServiceImpl(database: Database) : ScraperService {
     private object Scrapers : Table() {
@@ -30,10 +31,13 @@ class ScraperServiceImpl(database: Database) : ScraperService {
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
 
-    override suspend fun create(scraperName: String, scraperApiKey: String): Int = dbQuery {
+    override suspend fun create(scraperDTO: ScraperDTO): Int = dbQuery {
         Scrapers.insert {
-            it[name] = scraperName
-            it[apiKey] = scraperApiKey
+            it[name] = scraperDTO.name
+            it[apiKey] = scraperDTO.apiKey
+            it[description_en] = scraperDTO.descriptionEnglish
+            it[description_uk] = scraperDTO.descriptionUkrainian
+            it[url] = scraperDTO.url
         }[Scrapers.id]
     }
 
@@ -53,10 +57,13 @@ class ScraperServiceImpl(database: Database) : ScraperService {
             .singleOrNull()
     }
 
-    override suspend fun update(id: Int, scraperName: String, scraperApiKey: String) = dbQuery {
+    override suspend fun update(id: Int, scraperDTO: ScraperDTO) = dbQuery {
         Scrapers.update({ Scrapers.id eq id }) {
-            it[name] = scraperName
-            it[apiKey] = scraperApiKey
+            it[name] = scraperDTO.name
+            it[apiKey] = scraperDTO.apiKey
+            it[description_en] = scraperDTO.descriptionEnglish
+            it[description_uk] = scraperDTO.descriptionUkrainian
+            it[url] = scraperDTO.url
         }
     }
 

@@ -13,4 +13,19 @@ data class Scraper(
 ) : java.io.Serializable
 
 @Serializable
-data class ScraperDTO(val name: String, val apiKey: String)
+data class ScraperDTO(
+    val name: String,
+    val apiKey: String,
+    val descriptionEnglish: String = " ",
+    val descriptionUkrainian: String = " ",
+    val url: String = " "
+)
+
+fun ScraperDTO.toScraper(id: Int) = Scraper(
+    id = id,
+    name = name,
+    apiKey = apiKey,
+    descriptionEnglish = descriptionEnglish,
+    descriptionUkrainian = descriptionUkrainian,
+    url = url
+)

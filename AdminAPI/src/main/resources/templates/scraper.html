@@ -29,6 +29,21 @@
         <strong th:text="'Total submitted ' + ${entry.key} + ':'"></strong>
         <span th:text="${entry.value}"></span>
     </div>
+
+    <div>
+        <strong>English description:</strong>
+        <span th:text="${scraper.descriptionEnglish}"></span>
+    </div>
+
+    <div>
+        <strong>Ukrainian description:</strong>
+        <span th:text="${scraper.descriptionUkrainian}"></span>
+    </div>
+
+    <div>
+        <strong>URL:</strong>
+        <span th:text="${scraper.url}"></span>
+    </div>
 </div>
 
 </body>

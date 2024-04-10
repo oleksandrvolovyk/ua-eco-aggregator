@@ -2,6 +2,7 @@ package ua.eco.aggregator.backend
 
 import org.jetbrains.exposed.sql.Column
 import ua.eco.aggregator.base.model.Scraper
+import ua.eco.aggregator.base.model.ScraperDTO
 
 /**
  * Scraper service
@@ -15,11 +16,10 @@ interface ScraperService {
     /**
      * Create new Scraper
      *
-     * @param scraperName Scraper name
-     * @param scraperApiKey Scraper API key
+     * @param scraperDTO Scraper DTO
      * @return ID of the created Scraper
      */
-    suspend fun create(scraperName: String, scraperApiKey: String): Int
+    suspend fun create(scraperDTO: ScraperDTO): Int
 
     /**
      * Read all Scrapers
@@ -48,11 +48,10 @@ interface ScraperService {
      * Update Scraper by ID
      *
      * @param id Scraper ID
-     * @param scraperName New Scraper name
-     * @param scraperApiKey New Scraper API key
+     * @param scraperDTO Scraper DTO
      * @return
      */
-    suspend fun update(id: Int, scraperName: String, scraperApiKey: String): Int
+    suspend fun update(id: Int, scraperDTO: ScraperDTO): Int
 
     /**
      * Delete Scraper by ID

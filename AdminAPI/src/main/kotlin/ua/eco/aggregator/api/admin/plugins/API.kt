@@ -36,16 +36,16 @@ fun Application.configureAPI() {
 
                     // Create scraper
                     post {
-                        val scraper = call.receive<ScraperDTO>()
-                        val id = scraperService.create(scraper.name, scraper.apiKey)
+                        val scraperDTO = call.receive<ScraperDTO>()
+                        val id = scraperService.create(scraperDTO)
                         call.respond(HttpStatusCode.Created, id)
                     }
 
                     // Update scraper
                     put("/{id}") {
                         val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-                        val scraper = call.receive<ScraperDTO>()
-                        scraperService.update(id, scraper.name, scraper.apiKey)
+                        val scraperDTO = call.receive<ScraperDTO>()
+                        scraperService.update(id, scraperDTO)
                         call.respond(HttpStatusCode.OK)
                     }
 

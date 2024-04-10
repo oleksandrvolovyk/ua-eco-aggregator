@@ -15,6 +15,9 @@
         <th>ID</th>
         <th>Name</th>
         <th>API Key</th>
+        <th>English description</th>
+        <th>Ukrainian description</th>
+        <th>URL</th>
         <th>Action</th>
     </tr>
     </thead>
@@ -33,6 +36,48 @@
             <!-- Editable apiKey field -->
             <input type="text" name="apiKey" th:value="${scraper.apiKey}"/>
             <button th:onclick="saveEdits([[${scraper.id}]], [[${scraper.name}]], this.parentElement.children[0].value)">
+                Save
+            </button>
+        </td>
+        <td>
+            <!-- Editable english description field -->
+            <input type="text" name="descriptionEnglish" th:value="${scraper.descriptionEnglish}"/>
+            <button th:onclick="saveEdits(
+                [[${scraper.id}]],
+                [[${scraper.name}]],
+                [[${scraper.apiKey}]],
+                this.parentElement.children[0].value,
+                [[${scraper.descriptionUkrainian}]],
+                [[${scraper.url}]]
+            )">
+                Save
+            </button>
+        </td>
+        <td>
+            <!-- Editable ukrainian description field -->
+            <input type="text" name="descriptionUkrainian" th:value="${scraper.descriptionUkrainian}"/>
+            <button th:onclick="saveEdits(
+                [[${scraper.id}]],
+                [[${scraper.name}]],
+                [[${scraper.apiKey}]],
+                [[${scraper.descriptionEnglish}]],
+                this.parentElement.children[0].value,
+                [[${scraper.url}]]
+            )">
+                Save
+            </button>
+        </td>
+        <td>
+            <!-- Editable url field -->
+            <input type="url" name="url" th:value="${scraper.url}"/>
+            <button th:onclick="saveEdits(
+                [[${scraper.id}]],
+                [[${scraper.name}]],
+                [[${scraper.apiKey}]],
+                [[${scraper.descriptionEnglish}]],
+                [[${scraper.descriptionUkrainian}]],
+                this.parentElement.children[0].value
+            )">
                 Save
             </button>
         </td>
@@ -62,14 +107,32 @@
         <input type="text" id="apiKey" name="apiKey" required>
     </div>
 
+    <div>
+        <label for="descriptionEnglish">English description:</label>
+        <input type="text" id="descriptionEnglish" name="descriptionEnglish" required>
+    </div>
+
+    <div>
+        <label for="descriptionUkrainian">Ukrainian description:</label>
+        <input type="text" id="descriptionUkrainian" name="descriptionUkrainian" required>
+    </div>
+
+    <div>
+        <label for="url">URL:</label>
+        <input type="url" id="url" name="url" required>
+    </div>
+
     <button type="button" onclick="submitNewScraper()">Submit new Scraper</button>
 </form>
 
 <script>
-    function saveEdits(scraperId, scraperName, scraperApiKey) {
+    function saveEdits(scraperId, scraperName, scraperApiKey, descriptionEnglish, descriptionUkrainian, url) {
         const jsonData = {
             'name': scraperName,
-            'apiKey': scraperApiKey
+            'apiKey': scraperApiKey,
+            'descriptionEnglish': descriptionEnglish,
+            'descriptionUkrainian': descriptionUkrainian,
+            'url': url
         }
 
         fetch(`/api/scrapers/${scraperId}`, {
@@ -116,11 +179,17 @@
         // Get form data
         const name = document.getElementById("name").value;
         const apiKey = document.getElementById("apiKey").value;
+        const descriptionEnglish = document.getElementById("descriptionEnglish").value;
+        const descriptionUkrainian = document.getElementById("descriptionUkrainian").value;
+        const url = document.getElementById("url").value;
 
         // Create JSON data
         const jsonData = {
             'name': name,
-            'apiKey': apiKey
+            'apiKey': apiKey,
+            'descriptionEnglish': descriptionEnglish,
+            'descriptionUkrainian': descriptionUkrainian,
+            'url': url
         };
 
         // Make a fetch POST request to create a new scraper
