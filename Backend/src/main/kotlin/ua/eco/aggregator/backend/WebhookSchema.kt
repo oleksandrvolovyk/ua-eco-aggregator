@@ -1,10 +1,6 @@
 package ua.eco.aggregator.backend
 
 import kotlinx.coroutines.Dispatchers
-import ua.eco.aggregator.base.model.AggregatedRecord
-import ua.eco.aggregator.base.model.AggregatedRecordClasses
-import ua.eco.aggregator.base.model.PendingWebhookCall
-import ua.eco.aggregator.base.model.WebhookDTO
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -13,6 +9,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.core.qualifier.named
 import org.koin.java.KoinJavaComponent.inject
+import ua.eco.aggregator.base.model.*
 
 class WebhookService(database: Database) {
 
@@ -90,6 +87,10 @@ class WebhookService(database: Database) {
         } != 0
     }
 
+    suspend fun getByUrl(callbackUrl: String): List<Webhook> = dbQuery {
+        return@dbQuery Webhooks.select { Webhooks.callbackUrl eq callbackUrl }.map { it.toWebhook() }
+    }
+
     suspend fun getPendingWebhookCalls(): List<PendingWebhookCall<AggregatedRecord>> = dbQuery {
         PendingWebhookCalls.selectAll().mapNotNull { it.toPendingWebhookCall() }
     }
@@ -101,6 +102,15 @@ class WebhookService(database: Database) {
     suspend fun deleteWebhooksByCallbackUrl(invalidCallbackUrl: String) = dbQuery {
         // Delete all webhooks with this callbackUrl
         Webhooks.deleteWhere { callbackUrl eq invalidCallbackUrl }
+    }
+
+    private fun ResultRow.toWebhook(): Webhook {
+        return Webhook(
+            id = this[Webhooks.id],
+            latitude = this[Webhooks.latitude],
+            longitude = this[Webhooks.longitude],
+            callbackUrl = this[Webhooks.callbackUrl]
+        )
     }
 
     private suspend fun ResultRow.toPendingWebhookCall(): PendingWebhookCall<AggregatedRecord>? {

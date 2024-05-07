@@ -55,6 +55,14 @@ fun Application.configureWebhookAPI() {
             }
         }
 
+        route("/subscriptions") {
+            get {
+                val url = call.parameters["url"] ?: throw IllegalArgumentException("Provide a callback url!")
+
+                call.respond(HttpStatusCode.OK, webhookService.getByUrl(url))
+            }
+        }
+
         route("/test") {
             get {
                 val url = call.parameters["url"] ?: throw IllegalArgumentException("Provide a callback url to test!")
