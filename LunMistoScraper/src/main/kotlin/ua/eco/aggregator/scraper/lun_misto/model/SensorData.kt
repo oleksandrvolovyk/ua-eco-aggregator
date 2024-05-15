@@ -1,21 +1,15 @@
 package ua.eco.aggregator.scraper.lun_misto.model
 
-data class SensorData(
-    val station: Station,
-    val particles: List<Particle>
-) {
-    data class Station(
-        val coordinates: Coordinates,
-        val city: String,
-        val name: String,
-    ) {
-        data class Coordinates(val lat: Double, val lng: Double)
-    }
+import com.google.gson.annotations.SerializedName
 
-    data class Particle(
-        val time: String,
-        val pm10: Double?,
-        val pm25: Double?,
-        val pm100: Double?
-    )
-}
+data class SensorData(
+    val name: String,
+    @SerializedName(value = "lat") val latitude: Double,
+    @SerializedName(value = "lng") val longitude: Double,
+    val city: String,
+    val aqi: Double,
+    @SerializedName(value = "avgPm10") val pm10: Double?,
+    @SerializedName(value = "avgPm25") val pm25: Double,
+    @SerializedName(value = "avgPm100") val pm100: Double,
+    val updated: String
+)

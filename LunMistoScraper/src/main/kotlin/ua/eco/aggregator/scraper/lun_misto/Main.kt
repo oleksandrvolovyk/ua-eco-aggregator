@@ -10,6 +10,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.gson.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 import ua.eco.aggregator.base.model.AirQualityRecordDTO
 import ua.eco.aggregator.scraper.lun_misto.model.SensorData
@@ -32,38 +33,23 @@ fun main() = runBlocking {
         }
     }
 
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     dateFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
 
-    while (true) {
-        val sensorDatas: List<SensorData> = client.get("https://misto.lun.ua/api/air/v1/public/data").body()
+    while (coroutineContext.isActive) {
+        val sensorDatas: List<SensorData> = client.get("https://misto.lun.ua/api/v1/air/stations").body()
 
-        val airQualityRecordDTOs = mutableListOf<AirQualityRecordDTO>()
-
-        sensorDatas.forEach { sensorData ->
-            val latitude = sensorData.station.coordinates.lat
-            val longitude = sensorData.station.coordinates.lng
-
-            sensorData.particles.forEach { particle ->
-                if (particle.pm10 != null && particle.pm25 != null && particle.pm100 != null) {
-
-                    val date = dateFormat.parse(particle.time)
-                    val unixTimestamp = date.time / 1000 // Convert milliseconds to seconds
-
-                    airQualityRecordDTOs.add(
-                        AirQualityRecordDTO(
-                            latitude = latitude,
-                            longitude = longitude,
-                            timestamp = unixTimestamp,
-                            pm10 = particle.pm10.toFloat(),
-                            pm25 = particle.pm25.toFloat(),
-                            pm100 = particle.pm100.toFloat(),
-                            apiKey = SCRAPING_API_KEY,
-                            metadata = "LunMistoScraper ${sensorData.station.city}-${sensorData.station.name}"
-                        )
-                    )
-                }
-            }
+        val airQualityRecordDTOs = sensorDatas.map { sensorData ->
+            AirQualityRecordDTO(
+                latitude = sensorData.latitude,
+                longitude = sensorData.longitude,
+                timestamp = dateFormat.parse(sensorData.updated).time / 1000,
+                pm10 = sensorData.pm10?.toFloat(),
+                pm25 = sensorData.pm25.toFloat(),
+                pm100 = sensorData.pm100.toFloat(),
+                apiKey = SCRAPING_API_KEY,
+                metadata = "LunMistoScraper ${sensorData.city}-${sensorData.name}"
+            )
         }
 
         println("Received ${airQualityRecordDTOs.size} records.")
