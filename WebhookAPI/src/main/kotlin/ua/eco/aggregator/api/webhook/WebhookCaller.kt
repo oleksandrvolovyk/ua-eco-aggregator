@@ -54,7 +54,7 @@ class WebhookCaller(webhookService: WebhookService) {
                         is ResponseContainer.Success -> {
                             if (
                                 responseContainer.response.status != HttpStatusCode.OK ||
-                                responseContainer.response.body<String>() == CALLBACK_URL_VALID_RESPONSE
+                                responseContainer.response.body<String>() != CALLBACK_URL_VALID_RESPONSE
                             ) {
                                 // Remove webhook because of invalid response
                                 println(
