@@ -37,6 +37,24 @@ paths:
               examples:
                 Example#1:
                   value: "Webhook added!"
+  /subscriptions:
+    get:
+      description: "Отримати список вебхуків за callback URL."
+      parameters:
+        - name: "url"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "Список вебхуків."
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Webhook"
   /test:
     get:
       description: "Перевірка валідності callback URL."
@@ -47,15 +65,6 @@ paths:
         schema:
           type: "string"
       responses:
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
         "200":
           description: "OK"
           content:
@@ -122,3 +131,26 @@ components:
       - "latitude"
       - "longitude"
       - "callbackUrl"
+    Webhook:
+      type: "object"
+      properties:
+        id:
+          description: "Ідентифікатор."
+          type: "integer"
+          format: "int32"
+        latitude:
+          description: "Широта."
+          type: "number"
+          format: "double"
+        longitude:
+          description: "Довгота."
+          type: "number"
+          format: "double"
+        callbackUrl:
+          description: "Callback URL"
+          type: "string"
+      required:
+        - "id"
+        - "latitude"
+        - "longitude"
+        - "callbackUrl"
