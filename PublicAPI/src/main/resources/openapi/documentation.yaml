@@ -223,6 +223,115 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/RadiationRecord"
+  /api/fire-records:
+    get:
+      description: "Отримати записи про пожежі з використанням вказаних фільтрів"
+      parameters:
+        - name: "providerId"
+          description: "Фільтрувати записи за ідентифікатором постачальника даних"
+          in: "query"
+          required: false
+          schema:
+            type: "integer"
+        - name: "timestampStart"
+          description: "Фільтрувати записи з timestamp більше або рівно вказаного значення. Обов'язково вказувати timestampEnd"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "timestampEnd"
+          description: "Фільтрувати записи з міткою часу менше або рівно вказаного значення. Обов'язково вказувати timestampStart"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "latitude"
+          description: "Фільтрувати записи за локацією. Обов'язково вказувати longitude"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "longitude"
+          description: "Фільтрувати записи за локацією. Обов'язково вказувати latitude"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "sortField"
+          description: "Поле, за яким виконувати сортування результатів (timestamp, confidence або fireRadiativePower). За замовчуванням - timestamp"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            default: "timestamp"
+        - name: "sortDirection"
+          description: "Напрям сортування (ascending або descending). За замовчуванням - ascending"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            default: "ascending"
+        - name: "page"
+          description: "Номер сторінки"
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PaginatedData_FireRecord"
+  /api/fire-records/{id}:
+    get:
+      description: "Отримати запис про пожежу по ідентифікатору"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FireRecord"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/fire-records/latest:
+    get:
+      description: "Отримати останні записи про пожежі з усіх локацій, які були створені менш ніж maxAge секунд тому"
+      parameters:
+        - name: "at"
+          description: "Timestamp (в секундах), за яким необхідно отримати останні записи. Якщо не вказано, використовується поточний час."
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+        - name: "maxAge"
+          description: "Максимальний вік запису в секундах. За замовчуванням використовується 86400 секунд (24 години)."
+          in: "query"
+          required: false
+          schema:
+            type: "number"
+            default: 86400
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FireRecord"
   /api/scrapers:
     get:
       description: "Отримати всіх Scraper-ів"
@@ -297,7 +406,7 @@ components:
           description: "Ідентифікатор постачальника даних."
         metadata:
           type: "string"
-          description: "Метадані запису про якість повітря."
+          description: "Метадані запису."
         createdAt:
           type: "integer"
           format: "int64"
@@ -380,7 +489,7 @@ components:
           description: "Ідентифікатор постачальника даних."
         metadata:
           type: "string"
-          description: "Метадані запису про радіаційний рівень."
+          description: "Метадані запису."
         createdAt:
           type: "integer"
           format: "int64"
@@ -410,6 +519,79 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/RadiationRecord"
+    FireRecord:
+      description: "Запис про пожежу."
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+          description: "Унікальний ідентифікатор запису."
+        latitude:
+          type: "number"
+          format: "double"
+          description: "Широта місця, де були зібрані дані про якість повітря."
+        longitude:
+          type: "number"
+          format: "double"
+          description: "Довгота місця, де були зібрані дані про якість повітря."
+        timestamp:
+          type: "integer"
+          format: "int64"
+          description: "Timestamp (в секундах), коли дані було зібрано."
+        scan:
+          type: "number"
+          format: "double"
+          description: "Скан пожежі(в кілометрах)"
+        track:
+          type: "number"
+          format: "double"
+          description: "Трек пожежі(в кілометрах)"
+        confidence:
+          type: "integer"
+          nullable: true
+          format: "int64"
+          description: "Рівень впевненості в даних про пожежу (0-100)"
+        fireRadiativePower:
+          type: "number"
+          format: "double"
+          description: "Потужність випромінювання пожежі"
+        providerId:
+          type: "integer"
+          format: "int32"
+          description: "Ідентифікатор постачальника даних."
+        metadata:
+          type: "string"
+          description: "Метадані запису."
+        createdAt:
+          type: "integer"
+          format: "int64"
+          description: "Мітка часу створення запису (у мілісекундах)."
+    PaginatedData_FireRecord:
+      description: "Пагіновані дані."
+      type: "object"
+      properties:
+        page:
+          description: "Номер сторінки."
+          type: "integer"
+          format: "int64"
+        maxPageNumber:
+          description: "Максимальний номер сторінки."
+          type: "integer"
+          format: "int64"
+        itemsPerPage:
+          description: "Кількість записів у сторінці."
+          type: "integer"
+          format: "int32"
+        totalItemsCount:
+          description: "Загальна кількість записів."
+          type: "integer"
+          format: "int64"
+        data:
+          description: "Дані."
+          type: "array"
+          items:
+            $ref: "#/components/schemas/FireRecord"
     PublicScraper:
       description: "Scraper."
       type: "object"
@@ -429,3 +611,7 @@ components:
           type: "integer"
           format: "int64"
           description: "Загальна кількість надісланих записів про радіаційний рівень."
+        totalSubmittedFireRecords:
+          type: "integer"
+          format: "int64"
+          description: "Загальна кількість надісланих записів про пожежі."
