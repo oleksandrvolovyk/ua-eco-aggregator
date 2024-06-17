@@ -8,7 +8,7 @@ fun Application.configureAuth() {
     install(Authentication) {
         basic("auth-basic") {
             validate { userPasswordCredentials ->
-                if (authenticate(userPasswordCredentials.name, userPasswordCredentials.password.sha256()))
+                if (authenticate(userPasswordCredentials.name, userPasswordCredentials.password.sha512()))
                     UserIdPrincipal(userPasswordCredentials.name)
                 else
                     null
@@ -17,12 +17,12 @@ fun Application.configureAuth() {
     }
 }
 
-private fun authenticate(username: String, passwordSHA256Hash: String): Boolean {
+private fun authenticate(username: String, passwordSHA512Hash: String): Boolean {
     return username == System.getenv("UAECOAGGREGATOR_USERNAME") &&
-            passwordSHA256Hash == System.getenv("UAECOAGGREGATOR_PASSWORD_HASH")
+            passwordSHA512Hash == System.getenv("UAECOAGGREGATOR_PASSWORD_HASH")
 }
 
-private fun String.sha256(): String = MessageDigest
-    .getInstance("SHA-256")
+private fun String.sha512(): String = MessageDigest
+    .getInstance("SHA-512")
     .digest(this.toByteArray())
     .fold("") { str, it -> str + "%02x".format(it) }
