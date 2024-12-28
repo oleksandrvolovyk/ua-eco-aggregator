@@ -1,39 +1,45 @@
+version: '3.8'
+
+x-environments:
+  db-config: &db-config
+    DB_CONNECTION_STRING: "insert connection string"
+    DB_USER: "insert username"
+    DB_PASS: "insert password"
+
 services:
   webhook-api:
     build: ./WebhookAPI/.
     ports:
       - "8083:8080"
     environment:
-      DB_CONNECTION_STRING: "insert connection string"
-      DB_USER: "insert username"
-      DB_PASS: "insert password"
+      <<: *db-config
+    restart: always
 
   public-api:
     build: ./PublicAPI/.
     ports:
       - "8082:8080"
     environment:
-      DB_CONNECTION_STRING: "insert connection string"
-      DB_USER: "insert username"
-      DB_PASS: "insert password"
+      <<: *db-config
+    restart: always
 
   admin-api:
     build: ./AdminAPI/.
     ports:
       - "8081:8080"
     environment:
-      DB_CONNECTION_STRING: "insert connection string"
-      DB_USER: "insert username"
-      DB_PASS: "insert password"
+      <<: *db-config
+      UAECOAGGREGATOR_USERNAME: "admin"
+      UAECOAGGREGATOR_PASSWORD_HASH: "d4aa4b3713f6291df4dae02b5951ebe5001e41bd6cbe418319c357872271cf4599d9248dc903ed9af1f26c058cedb04886154cbbd344c5d722808fcb970541df"
+    restart: always
 
   scraper-api:
     build: ./ScraperAPI/.
     ports:
       - "8080:8080"
     environment:
-      DB_CONNECTION_STRING: "insert connection string"
-      DB_USER: "insert username"
-      DB_PASS: "insert password"
+      <<: *db-config
+    restart: always
 
   lun-misto-scraper:
     build: ./LunMistoScraper/.
@@ -43,6 +49,7 @@ services:
       SCRAPING_API_URL: "http://scraper-api:8080/air-quality-records"
       SCRAPING_API_KEY: "lun-misto-scraper"
       POLLING_DELAY_IN_SECONDS: 3600 # every 60 minutes
+    restart: always
 
   sensor-community-scraper:
     build: ./SensorCommunityScraper/.
@@ -52,6 +59,7 @@ services:
       SCRAPING_API_URL: "http://scraper-api:8080/air-quality-records"
       SCRAPING_API_KEY: "sensor-community-scraper"
       POLLING_DELAY_IN_SECONDS: 3660 # every 61 minutes
+    restart: always
 
   meteo-gov-ua-scraper:
     build: ./MeteoGovUaScraper/.
@@ -61,6 +69,7 @@ services:
       SCRAPING_API_URL: "http://scraper-api:8080/radiation-records"
       SCRAPING_API_KEY: "meteo-gov-ua-scraper"
       POLLING_DELAY_IN_SECONDS: 86400 # every 24 hours
+    restart: always
 
   save-dnipro-scraper:
     build: ./SaveDniproScraper/.
@@ -70,6 +79,7 @@ services:
       SCRAPING_API_URL: "http://scraper-api:8080/air-quality-records"
       SCRAPING_API_KEY: "save-dnipro-scraper"
       POLLING_DELAY_IN_SECONDS: 3720 # every 62 minutes
+    restart: always
 
   eco-zagroza-gov-ua-scraper:
     build: ./EcoZagrozaGovUaScraper/.
@@ -79,6 +89,7 @@ services:
       SCRAPING_API_URL: "http://scraper-api:8080/radiation-records"
       SCRAPING_API_KEY: "eco-zagroza-gov-ua-scraper"
       POLLING_DELAY_IN_SECONDS: 1800 # every 30 minutes
+    restart: always
 
   nasa-firms-scraper:
     build: ./NasaFirmsScraper/.
@@ -89,3 +100,4 @@ services:
       SCRAPING_API_KEY: "nasa-firms-scraper"
       FIRMS_API_KEY: "firms-api-key"
       POLLING_DELAY_IN_SECONDS: 86400 # every 24 hours
+    restart: always
