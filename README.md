@@ -9,7 +9,7 @@
 2. [SaveDnipro](https://www.savednipro.org/product-category/monitoring-yakosti-povitrya/) – дані про якість повітря
 3. [Sensor.community](https://sensor.community/) – дані про якість повітря
 4. [meteo.gov.ua](https://www.meteo.gov.ua/ua/Situaciya-na-punktakh-sposterezhennya) – дані про радіаційний фон
-5. [eco-zagroza.gov.ua](https://eco-zagroza.gov.ua) - дані про радіаційний фон
+5. [eco-zagroza.gov.ua](https://ecozagroza.gov.ua/) - дані про радіаційний фон
 6. [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/) – дані про пожежі
 
 ## Необхідна інфраструктура для запуску
